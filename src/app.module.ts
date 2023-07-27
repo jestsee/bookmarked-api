@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env.local',
+      isGlobal: true,
     }),
     PrismaModule,
     AuthModule,
