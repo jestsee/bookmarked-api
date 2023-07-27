@@ -12,3 +12,12 @@ services:
       POSTGRES_USER: prisma
       POSTGRES_PASSWORD: prisma
       POSTGRES_DB: bookmark-dev
+  test-db:
+    image: postgres:15
+    restart: always
+    ports:
+      - '5435:5432'
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+      POSTGRES_DB: bookmark-dev

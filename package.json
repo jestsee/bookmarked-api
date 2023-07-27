@@ -12,6 +12,9 @@
     "db:dev:rm": "docker compose rm dev-db -s -f -v",
     "db:dev:up": "docker compose up dev-db -d",
     "db:dev:restart": "pnpm db:dev:rm && pnpm db:dev:up && pnpm env:local -- prisma migrate deploy",
+    "db:test:rm": "docker compose rm test-db -s -f -v",
+    "db:test:up": "docker compose up test-db -d",
+    "db:test:restart": "pnpm db:test:rm && pnpm db:test:up && pnpm env:test -- prisma migrate deploy",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -27,6 +30,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.1.0",
@@ -35,6 +39,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "5.0.0",
     "argon2": "^0.30.3",
+    "axios": "^1.4.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
