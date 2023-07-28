@@ -17,10 +17,11 @@ model User {
   hash String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  notionAccessToken String?
 
   bookmarkCreated Bookmark[] @relation(name: "UserWhoCreateBookmark")
   bookmarkUpdated Bookmark[] @relation(name: "UserWhoUpdateBookmark")
+
+  notion Notion?
 }
 
 model Bookmark {
@@ -29,12 +30,24 @@ model Bookmark {
   description String?
   images String[]
   url String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
   createdBy    User    @relation(name: "UserWhoCreateBookmark", fields: [userIdCreate], references: [id])
   updatedBy    User?   @relation(name: "UserWhoUpdateBookmark", fields: [userIdUpdate], references: [id])
   userIdCreate String
   userIdUpdate String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
-// TODO GROUP
+model Notion {
+  id String @id @default(uuid())
+  accessToken String 
+  tokenType String
+  botId String
+  workspaceName String
+  workspaceId String
+  duplicatedTemplateId String?
+
+  user User @relation(fields: [userId], references: [id])
+  userId String @unique
+}

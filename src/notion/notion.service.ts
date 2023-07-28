@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
+import { INotionAccessToken } from './interface';
 
 // https://developers.notion.com/docs/authorization#prompt-for-a-standard-integration-with-no-template-option-default
 @Injectable()
@@ -32,7 +33,7 @@ export class NotionService {
 
       const response = await this.httpService.axiosRef.post<
         null,
-        { data: { access_token: string } }
+        INotionAccessToken
       >(
         'https://api.notion.com/v1/oauth/token',
         {
@@ -50,12 +51,28 @@ export class NotionService {
       );
 
       // get the access token
-      const accessToken = response.data.access_token;
+      const tokenInfo = response.data;
 
-      // update access token on user data
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: { notionAccessToken: accessToken },
+      // update or store notion token info on db
+      await this.prisma.notion.upsert({
+        where: { userId: user.id },
+        update: {
+          accessToken: tokenInfo.access_token,
+          botId: tokenInfo.bot_id,
+          duplicatedTemplateId: tokenInfo.duplicate_template_id,
+          tokenType: tokenInfo.token_type,
+          workspaceId: tokenInfo.workspace_id,
+          workspaceName: tokenInfo.workspace_name,
+        },
+        create: {
+          accessToken: tokenInfo.access_token,
+          botId: tokenInfo.bot_id,
+          duplicatedTemplateId: tokenInfo.duplicate_template_id,
+          tokenType: tokenInfo.token_type,
+          workspaceId: tokenInfo.workspace_id,
+          workspaceName: tokenInfo.workspace_name,
+          userId: user.id,
+        },
       });
 
       return { access_token: response.data.access_token };
