@@ -17,6 +17,7 @@ model User {
   hash String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  notionAccessToken String?
 
   bookmarkCreated Bookmark[] @relation(name: "UserWhoCreateBookmark")
   bookmarkUpdated Bookmark[] @relation(name: "UserWhoUpdateBookmark")
