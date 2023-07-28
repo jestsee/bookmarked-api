@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { NotionModule } from './notion/notion.module';
+import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { NotionModule } from './notion/notion.module';
     AuthModule,
     UserModule,
     NotionModule,
+    NotionSdkModule,
   ],
   controllers: [AppController],
   providers: [AppService],

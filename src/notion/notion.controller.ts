@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { NotionService } from './notion.service';
 import { NotionIntegrationDto } from './dto/notion-integration.dto';
 import { JwtGuard } from 'src/auth/guards';
@@ -14,7 +21,11 @@ export class NotionController {
   @HttpCode(HttpStatusCode.Ok)
   @Post('integration')
   integration(@Body() dto: NotionIntegrationDto, @GetUser() user: User) {
-    console.log({ hai: user });
     return this.notionService.getAccessToken(dto, user);
+  }
+
+  @Get('databases')
+  getDatabases(@GetUser() user: User) {
+    return this.notionService.getDatabases(user);
   }
 }

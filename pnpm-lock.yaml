@@ -12,6 +12,7 @@ specifiers:
   '@nestjs/platform-express': ^10.0.0
   '@nestjs/schematics': ^10.0.0
   '@nestjs/testing': ^10.0.0
+  '@notionhq/client': ^2.2.9
   '@prisma/client': 5.0.0
   '@types/express': ^4.17.17
   '@types/jest': ^29.5.2
@@ -52,6 +53,7 @@ dependencies:
   '@nestjs/mapped-types': registry.npmjs.org/@nestjs/mapped-types/2.0.2_mxikl7ac5t2lqbpjqow4lneofa
   '@nestjs/passport': registry.npmjs.org/@nestjs/passport/10.0.0_mlm6seznvdr7s22gz5renceaaq
   '@nestjs/platform-express': registry.npmjs.org/@nestjs/platform-express/10.1.0_hbea26ufw2zquywaxfa5b5stgu
+  '@notionhq/client': registry.npmjs.org/@notionhq/client/2.2.9
   '@prisma/client': registry.npmjs.org/@prisma/client/5.0.0_prisma@5.0.0
   argon2: registry.npmjs.org/argon2/0.30.3
   axios: registry.npmjs.org/axios/1.4.0
@@ -1389,6 +1391,18 @@ packages:
       fastq: registry.npmjs.org/fastq/1.15.0
     dev: true
 
+  registry.npmjs.org/@notionhq/client/2.2.9:
+    resolution: {integrity: sha512-g/JKWTELNhe4SdJj5nBXNGB0tkOkOlOH81QSa3oG1855QWiRhOv/ti6LeWNWEPR3BettNztDv5zC/I05wDkFtg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@notionhq/client/-/client-2.2.9.tgz}
+    name: '@notionhq/client'
+    version: 2.2.9
+    engines: {node: '>=12'}
+    dependencies:
+      '@types/node-fetch': registry.npmjs.org/@types/node-fetch/2.6.4
+      node-fetch: registry.npmjs.org/node-fetch/2.6.12
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
   registry.npmjs.org/@nuxtjs/opencollective/0.3.2:
     resolution: {integrity: sha512-um0xL3fO7Mf4fDxcqx9KryrB7zgRM5JSlvGN5AGkP6JLM5XEKyjeAiPbNxdXVXQ16isuAhYpvP88NgL2BGd6aA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@nuxtjs/opencollective/-/opencollective-0.3.2.tgz}
     name: '@nuxtjs/opencollective'
@@ -1659,6 +1673,15 @@ packages:
     name: '@types/mime'
     version: 3.0.1
     dev: true
+
+  registry.npmjs.org/@types/node-fetch/2.6.4:
+    resolution: {integrity: sha512-1ZX9fcN4Rvkvgv4E6PAY5WXUFWFcRWxZa3EW83UjycOB9ljJCedb2CupIP4RZMEwF/M3eTcCihbBRgwtGbg5Rg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@types/node-fetch/-/node-fetch-2.6.4.tgz}
+    name: '@types/node-fetch'
+    version: 2.6.4
+    dependencies:
+      '@types/node': registry.npmjs.org/@types/node/20.4.4
+      form-data: registry.npmjs.org/form-data/3.0.1
+    dev: false
 
   registry.npmjs.org/@types/node/20.4.4:
     resolution: {integrity: sha512-CukZhumInROvLq3+b5gLev+vgpsIqC2D0deQr/yS1WnxvmYLlJXZpaQrQiseMY+6xusl79E04UjWoqyr+t1/Ew==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@types/node/-/node-20.4.4.tgz}
@@ -3682,6 +3705,17 @@ packages:
       typescript: registry.npmjs.org/typescript/5.1.6
       webpack: registry.npmjs.org/webpack/5.88.1
     dev: true
+
+  registry.npmjs.org/form-data/3.0.1:
+    resolution: {integrity: sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/form-data/-/form-data-3.0.1.tgz}
+    name: form-data
+    version: 3.0.1
+    engines: {node: '>= 6'}
+    dependencies:
+      asynckit: registry.npmjs.org/asynckit/0.4.0
+      combined-stream: registry.npmjs.org/combined-stream/1.0.8
+      mime-types: registry.npmjs.org/mime-types/2.1.35
+    dev: false
 
   registry.npmjs.org/form-data/4.0.0:
     resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/form-data/-/form-data-4.0.0.tgz}
