@@ -8,6 +8,8 @@ import { UserModule } from './user/user.module';
 import { NotionModule } from './notion/notion.module';
 import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
 import { PuppeteerModule } from './puppeteer/puppeteer.module';
+import { TwitterModule } from './twitter/twitter.module';
+import { DataScraperModule } from './data-scraper/data-scraper.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { PuppeteerModule } from './puppeteer/puppeteer.module';
     NotionModule,
     NotionSdkModule,
     PuppeteerModule,
+    TwitterModule,
+    DataScraperModule,
   ],
   controllers: [AppController],
   providers: [AppService],
