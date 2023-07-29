@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { NotionModule } from './notion/notion.module';
 import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
+import { PuppeteerModule } from './puppeteer/puppeteer.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
     UserModule,
     NotionModule,
     NotionSdkModule,
+    PuppeteerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

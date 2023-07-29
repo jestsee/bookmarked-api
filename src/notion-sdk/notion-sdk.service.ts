@@ -43,6 +43,7 @@ export class NotionSdkService {
     );
   }
 
+  // TODO when the accessToken expire?
   async getDatabases(accessToken: string) {
     const response = await this.client.search({
       auth: accessToken,
