@@ -15,28 +15,31 @@ export class TwitterService {
         });
       },
     );
-    console.log({ arrString });
     return arrString.join('');
   }
 
   async getTweetPhoto(): Promise<string[]> {
-    await this.puppeteer.page.waitForSelector(
-      'div[data-testid="tweetPhoto"] > img',
-      { timeout: 2000 },
-    );
-    const arrUrl = await this.puppeteer.page.$$eval(
-      'div[data-testid="tweetPhoto"] > img',
-      (elements) => {
-        return elements.map((el) => {
-          return el.getAttribute('src');
-        });
-      },
-    );
-    console.log({ arrUrl });
-    return arrUrl;
+    try {
+      await this.puppeteer.page.waitForSelector(
+        'div[data-testid="tweetPhoto"] > img',
+        { timeout: 2000 },
+      );
+      const arrUrl = await this.puppeteer.page.$$eval(
+        'div[data-testid="tweetPhoto"] > img',
+        (elements) => {
+          return elements.map((el) => {
+            return el.getAttribute('src');
+          });
+        },
+      );
+      console.log({ arrUrl });
+      return arrUrl;
+    } catch (error) {
+      return [];
+    }
   }
 
-  async getTwitterData(url: string) {
+  async getTwitterDataByHtml(url: string) {
     await this.puppeteer.page.goto(url);
     await this.puppeteer.page.waitForSelector(
       'div[data-testid="tweetText"] span',
@@ -59,5 +62,41 @@ export class TwitterService {
     const photos = await this.getTweetPhoto();
 
     return { tweet, author, username, photos };
+  }
+
+  async getTwitterDataByNetwork(url: string) {
+    const resultPromise = new Promise((resolve) => {
+      this.puppeteer.page.on('response', async (response) => {
+        if (response.url().includes('graphql')) {
+          const resp = await response.json();
+          const temp = resp.data.tweetResult.result;
+          const userData = temp.core.user_results.result.legacy;
+
+          // construct data
+          const data = {
+            name: userData.name,
+            username: userData.screen_name,
+            text: temp.legacy.full_text,
+            photo: temp.legacy.entities.media.map(
+              (item) => item.media_url_https,
+            ),
+          };
+
+          console.log({ data });
+
+          // cancel listen to event
+          this.puppeteer.page.removeAllListeners();
+          resolve(data); // Resolve the Promise with the data
+        }
+      });
+    });
+
+    await this.puppeteer.page.goto(url);
+    const result = await resultPromise; // Wait for the Promise to resolve
+    return result;
+  }
+
+  async getTwitterData(url: string) {
+    return this.getTwitterDataByNetwork(url);
   }
 }
