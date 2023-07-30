@@ -1,5 +1,5 @@
 import { Body, Controller, Get } from '@nestjs/common';
-import { PuppeteerDto } from 'src/puppeteer/dto';
+import { GetTweetDataDto } from 'src/twitter/dto';
 import { TwitterService } from 'src/twitter/twitter.service';
 
 @Controller('data-scraper')
@@ -7,7 +7,7 @@ export class DataScraperController {
   constructor(private scraperService: TwitterService) {}
 
   @Get('twitter')
-  getTwitterData(@Body() dto: PuppeteerDto) {
-    return this.scraperService.getTwitterData(dto.url);
+  getTwitterData(@Body() dto: GetTweetDataDto) {
+    return this.scraperService.getTwitterData(dto.url, dto.type);
   }
 }

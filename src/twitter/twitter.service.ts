@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { HTTPResponse } from 'puppeteer';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
+import { GetTweetDataPayload, TweetData } from './interface';
+import { TwitterDataType } from './dto';
 
 @Injectable()
 export class TwitterService {
@@ -71,13 +72,10 @@ export class TwitterService {
     return newUrl;
   }
 
-  async getTwitterDataByNetworkHelper(
-    response: HTTPResponse,
-    resolve: (value: unknown) => void,
-    url: string,
-    arrData: any[],
-  ) {
+  async getTwitterDataByNetworkHelper(payload: GetTweetDataPayload) {
+    const { arrData, isThread, resolve, response, url } = payload;
     if (response.url().includes('graphql')) {
+      // deconstruct response
       const resp = await response.json();
       const temp = resp.data.tweetResult.result;
       const userData = temp.core.user_results.result.legacy;
@@ -87,6 +85,7 @@ export class TwitterService {
         name: userData.name,
         username: userData.screen_name,
         text: temp.legacy.full_text,
+        url,
         photo:
           temp.legacy.entities.media?.map((item) => item.media_url_https) ?? [],
       };
@@ -94,10 +93,12 @@ export class TwitterService {
       console.log({ data });
       arrData.push(data);
 
-      if (!temp.legacy.in_reply_to_status_id_str) {
+      // stop condition
+      if (!isThread || !temp.legacy.in_reply_to_status_id_str) {
         this.puppeteer.page.removeAllListeners();
         resolve(arrData.reverse());
       } else {
+        // recursive function
         this.puppeteer.page.removeAllListeners();
         await this.puppeteer.resetPage();
         const newUrl = this.generateNewUrl(
@@ -107,25 +108,30 @@ export class TwitterService {
         this.puppeteer.page.on(
           'response',
           async (response) =>
-            await this.getTwitterDataByNetworkHelper(
+            await this.getTwitterDataByNetworkHelper({
+              ...payload,
               response,
-              resolve,
-              newUrl,
-              arrData,
-            ),
+              url: newUrl,
+            }),
         );
         await this.puppeteer.page.goto(newUrl);
       }
     }
   }
 
-  async getTwitterDataByNetwork(url: string) {
-    const arr: any[] = [];
+  async getTwitterDataByNetwork(url: string, isThread: boolean) {
+    const arrData: TweetData[] = [];
     const resultPromise = new Promise((resolve) => {
       this.puppeteer.page.on(
         'response',
         async (response) =>
-          await this.getTwitterDataByNetworkHelper(response, resolve, url, arr),
+          await this.getTwitterDataByNetworkHelper({
+            response,
+            resolve,
+            url,
+            arrData,
+            isThread,
+          }),
       );
     });
 
@@ -134,7 +140,7 @@ export class TwitterService {
     return result;
   }
 
-  async getTwitterData(url: string) {
-    return this.getTwitterDataByNetwork(url);
+  async getTwitterData(url: string, type: TwitterDataType) {
+    return this.getTwitterDataByNetwork(url, type === TwitterDataType.THREAD);
   }
 }
