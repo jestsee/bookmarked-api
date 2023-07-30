@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { HTTPResponse } from 'puppeteer';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
 
 @Injectable()
@@ -64,31 +65,68 @@ export class TwitterService {
     return { tweet, author, username, photos };
   }
 
-  async getTwitterDataByNetwork(url: string) {
-    const resultPromise = new Promise((resolve) => {
-      this.puppeteer.page.on('response', async (response) => {
-        if (response.url().includes('graphql')) {
-          const resp = await response.json();
-          const temp = resp.data.tweetResult.result;
-          const userData = temp.core.user_results.result.legacy;
+  generateNewUrl(url: string, code: string) {
+    const lastSlashIndex = url.lastIndexOf('/');
+    const newUrl = url.substring(0, lastSlashIndex + 1) + code;
+    return newUrl;
+  }
 
-          // construct data
-          const data = {
-            name: userData.name,
-            username: userData.screen_name,
-            text: temp.legacy.full_text,
-            photo: temp.legacy.entities.media.map(
-              (item) => item.media_url_https,
+  async getTwitterDataByNetworkHelper(
+    response: HTTPResponse,
+    resolve: (value: unknown) => void,
+    url: string,
+    arrData: any[],
+  ) {
+    if (response.url().includes('graphql')) {
+      const resp = await response.json();
+      const temp = resp.data.tweetResult.result;
+      const userData = temp.core.user_results.result.legacy;
+
+      // construct data
+      const data = {
+        name: userData.name,
+        username: userData.screen_name,
+        text: temp.legacy.full_text,
+        photo:
+          temp.legacy.entities.media?.map((item) => item.media_url_https) ?? [],
+      };
+
+      console.log({ data });
+      arrData.push(data);
+
+      if (!temp.legacy.in_reply_to_status_id_str) {
+        this.puppeteer.page.removeAllListeners();
+        resolve(arrData.reverse());
+      } else {
+        this.puppeteer.page.removeAllListeners();
+        await this.puppeteer.resetPage();
+        const newUrl = this.generateNewUrl(
+          url,
+          temp.legacy.in_reply_to_status_id_str,
+        );
+        this.puppeteer.page.on(
+          'response',
+          async (response) =>
+            await this.getTwitterDataByNetworkHelper(
+              response,
+              resolve,
+              newUrl,
+              arrData,
             ),
-          };
+        );
+        await this.puppeteer.page.goto(newUrl);
+      }
+    }
+  }
 
-          console.log({ data });
-
-          // cancel listen to event
-          this.puppeteer.page.removeAllListeners();
-          resolve(data); // Resolve the Promise with the data
-        }
-      });
+  async getTwitterDataByNetwork(url: string) {
+    const arr: any[] = [];
+    const resultPromise = new Promise((resolve) => {
+      this.puppeteer.page.on(
+        'response',
+        async (response) =>
+          await this.getTwitterDataByNetworkHelper(response, resolve, url, arr),
+      );
     });
 
     await this.puppeteer.page.goto(url);

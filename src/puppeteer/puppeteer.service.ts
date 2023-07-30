@@ -16,6 +16,11 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
     await this.browser.close();
   }
 
+  async resetPage() {
+    await this.page.close();
+    this.page = await this.browser.newPage();
+  }
+
   getElementTextContent(selector: string): Promise<string | null> {
     return this.page.$eval(selector, (el) => el.textContent);
   }
