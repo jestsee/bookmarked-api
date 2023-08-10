@@ -84,6 +84,7 @@ export class TwitterService {
       const data = {
         name: userData.name,
         username: userData.screen_name,
+        avatar: userData.profile_image_url_https,
         text: temp.legacy.full_text,
         url,
         photo:
@@ -119,9 +120,12 @@ export class TwitterService {
     }
   }
 
-  async getTwitterDataByNetwork(url: string, isThread: boolean) {
+  async getTwitterDataByNetwork(
+    url: string,
+    isThread: boolean,
+  ): Promise<TweetData[]> {
     const arrData: TweetData[] = [];
-    const resultPromise = new Promise((resolve) => {
+    const resultPromise = new Promise<TweetData[]>((resolve) => {
       this.puppeteer.page.on(
         'response',
         async (response) =>

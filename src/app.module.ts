@@ -9,7 +9,6 @@ import { NotionModule } from './notion/notion.module';
 import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
 import { PuppeteerModule } from './puppeteer/puppeteer.module';
 import { TwitterModule } from './twitter/twitter.module';
-import { DataScraperModule } from './data-scraper/data-scraper.module';
 
 @Module({
   imports: [
@@ -24,7 +23,6 @@ import { DataScraperModule } from './data-scraper/data-scraper.module';
     NotionSdkModule,
     PuppeteerModule,
     TwitterModule,
-    DataScraperModule,
   ],
   controllers: [AppController],
   providers: [AppService],

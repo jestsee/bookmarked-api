@@ -3,6 +3,7 @@ import { HTTPResponse } from 'puppeteer';
 export interface TweetData {
   name: string;
   username: string;
+  avatar?: string;
   text: string;
   url: string;
   photo: string[];

@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client, LogLevel } from '@notionhq/client';
 import { INotionAccessToken } from 'src/notion/interface';
+import { TwitterDataType } from 'src/twitter/dto';
+import { TweetData } from 'src/twitter/interface';
 
 @Injectable()
 export class NotionSdkService {
@@ -43,12 +45,93 @@ export class NotionSdkService {
     );
   }
 
-  // TODO when the accessToken expire?
   async getDatabases(accessToken: string) {
     const response = await this.client.search({
       auth: accessToken,
       filter: { property: 'object', value: 'database' },
     });
     return response;
+  }
+
+  createPage(
+    accessToken: string,
+    databaseId: string,
+    tweet: TweetData,
+    type: TwitterDataType,
+    tags: string[],
+  ) {
+    return this.client.pages.create({
+      auth: accessToken,
+      parent: { database_id: databaseId },
+      icon: {
+        type: 'external',
+        external: {
+          url: tweet.avatar,
+        },
+      },
+      properties: {
+        Tweet: { title: [{ text: { content: tweet.text } }] },
+        Type: {
+          select: { name: type.charAt(0).toUpperCase() + type.slice(1) },
+        },
+        Author: {
+          rich_text: [
+            {
+              type: 'text',
+              text: { content: `${tweet.name} (@${tweet.username})` },
+            },
+          ],
+        },
+        Tags: {
+          multi_select: tags.map((tag) => ({ name: tag })),
+        },
+        'Tweet Link': {
+          url: tweet.url,
+        },
+      },
+    });
+  }
+
+  createBlock(accessToken: string, blockId: string, tweets: TweetData[]) {
+    return this.client.blocks.children.append({
+      auth: accessToken,
+      block_id: blockId,
+      children: tweets.map((tweet) => ({
+        type: 'callout',
+        callout: {
+          icon: {
+            type: 'external',
+            external: {
+              url: tweet.avatar,
+            },
+          },
+          color: 'default',
+          rich_text: [
+            {
+              type: 'text',
+              text: {
+                content: tweet.name,
+              },
+              annotations: {
+                bold: true,
+              },
+            },
+            {
+              type: 'text',
+              text: {
+                content: '@' + tweet.username,
+                link: { url: tweet.url },
+              },
+            },
+          ],
+          children: [
+            { paragraph: { rich_text: [{ text: { content: tweet.text } }] } },
+            ...tweet.photo.map((item) => ({
+              image: { external: { url: item } },
+            })),
+          ],
+        },
+      })),
+    });
   }
 }

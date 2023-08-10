@@ -4,6 +4,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
 import { NotionSdkService } from 'src/notion-sdk/notion-sdk.service';
+import { TwitterDataType } from 'src/twitter/dto';
+import { TweetData } from 'src/twitter/interface';
 
 @Injectable()
 export class NotionService {
@@ -49,11 +51,41 @@ export class NotionService {
     }
   }
 
-  async getDatabases(@GetUser() user: User) {
-    const { accessToken } = await this.prisma.notion.findUnique({
+  async connectToDatabase(@GetUser() user: User) {
+    const { accessToken, id } = await this.prisma.notion.findUnique({
       where: { userId: user.id },
-      select: { accessToken: true },
+      select: { accessToken: true, id: true },
     });
-    return this.notionSdk.getDatabases(accessToken);
+    const [database] = (await this.notionSdk.getDatabases(accessToken)).results;
+
+    // update notion info on db
+    const updatedData = await this.prisma.notion.update({
+      where: { id },
+      data: { databaseId: database.id },
+    });
+
+    // TODO only save the id from database which has required properties
+    return updatedData;
+  }
+
+  async createPage(@GetUser() user: User, tweets: TweetData[]) {
+    const { accessToken, databaseId } = await this.prisma.notion.findUnique({
+      where: { userId: user.id },
+      select: { accessToken: true, databaseId: true },
+    });
+    const firstTweet = tweets.at(0);
+    const page = await this.notionSdk.createPage(
+      accessToken,
+      databaseId,
+      firstTweet,
+      tweets.length > 1 ? TwitterDataType.THREAD : TwitterDataType.TWEET,
+      ['ehey'], // TODO tag
+    );
+
+    await this.notionSdk.createBlock(accessToken, page.id, tweets);
+
+    return {
+      message: 'Tweet successfully bookmarked',
+    };
   }
 }

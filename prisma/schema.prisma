@@ -47,6 +47,7 @@ model Notion {
   workspaceName String
   workspaceId String
   duplicatedTemplateId String?
+  databaseId String?
 
   user User @relation(fields: [userId], references: [id])
   userId String @unique
