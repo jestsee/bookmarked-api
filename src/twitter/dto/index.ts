@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export enum TwitterDataType {
   TWEET = 'tweet',
@@ -13,4 +13,7 @@ export class GetTweetDataDto {
   @IsEnum(TwitterDataType)
   @IsNotEmpty()
   type: TwitterDataType;
+
+  @IsOptional()
+  tags: string[];
 }

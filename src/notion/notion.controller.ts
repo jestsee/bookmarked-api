@@ -38,12 +38,6 @@ export class NotionController {
   @Post('bookmark-tweet')
   async bookmarkTweet(@GetUser() user: User, @Body() dto: GetTweetDataDto) {
     const tweets = await this.twitterService.getTwitterData(dto.url, dto.type);
-    return this.notionService.createPage(user, tweets as TweetData[]);
+    return this.notionService.createPage(user, tweets as TweetData[], dto.tags);
   }
-
-  // @HttpCode(HttpStatusCode.Ok)
-  // @Post('create-page')
-  // createPage(@GetUser() user: User) {
-  //   return this.notionService.createPage(user);
-  // }
 }

@@ -68,7 +68,11 @@ export class NotionService {
     return updatedData;
   }
 
-  async createPage(@GetUser() user: User, tweets: TweetData[]) {
+  async createPage(
+    @GetUser() user: User,
+    tweets: TweetData[],
+    tag: string[] = [],
+  ) {
     const { accessToken, databaseId } = await this.prisma.notion.findUnique({
       where: { userId: user.id },
       select: { accessToken: true, databaseId: true },
@@ -79,7 +83,7 @@ export class NotionService {
       databaseId,
       firstTweet,
       tweets.length > 1 ? TwitterDataType.THREAD : TwitterDataType.TWEET,
-      ['ehey'], // TODO tag
+      tag,
     );
 
     await this.notionSdk.createBlock(accessToken, page.id, tweets);

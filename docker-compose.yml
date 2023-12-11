@@ -20,4 +20,4 @@ services:
     environment:
       POSTGRES_USER: prisma
       POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: bookmark-dev
+      POSTGRES_DB: bookmark-test

@@ -7,6 +7,7 @@ export interface TweetData {
   text: string;
   url: string;
   photo: string[];
+  quotedTweet?: TweetData;
 }
 
 export interface GetTweetDataPayload {
