@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { NotionIntegrationDto } from './dto/notion-integration.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetUser } from 'src/auth/decorator';
@@ -45,7 +45,7 @@ export class NotionService {
 
       return { access_token: tokenInfo.access_token };
     } catch (error) {
-      throw new ForbiddenException(
+      throw new BadRequestException(
         error.response.data.error_description as string,
       );
     }
