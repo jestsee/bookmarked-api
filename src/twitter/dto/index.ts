@@ -8,6 +8,10 @@ export enum TwitterDataType {
 export class GetTweetDataDto {
   @IsString()
   @IsNotEmpty()
+  databaseId: string;
+
+  @IsString()
+  @IsNotEmpty()
   url: string;
 
   @IsEnum(TwitterDataType)

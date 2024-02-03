@@ -5,3 +5,9 @@ export class NotionIntegrationDto {
   @IsNotEmpty()
   code: string;
 }
+
+export class GetNotionDatabaseDto {
+  @IsString()
+  @IsNotEmpty()
+  accessToken: string;
+}

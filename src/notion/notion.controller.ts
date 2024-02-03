@@ -1,22 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Post } from '@nestjs/common';
 import { NotionService } from './notion.service';
-import { NotionIntegrationDto } from './dto/notion-integration.dto';
-import { JwtGuard } from 'src/auth/guards';
-import { GetUser } from 'src/auth/decorator';
-import { User } from '@prisma/client';
-import { HttpStatusCode } from 'axios';
 import { TwitterService } from 'src/twitter/twitter.service';
 import { GetTweetDataDto } from 'src/twitter/dto';
-import { TweetData } from 'src/twitter/interface';
+import { NotionIntegrationDto } from './dto';
+import { HttpStatusCode } from 'axios';
 
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('notion')
 export class NotionController {
   constructor(
@@ -25,19 +14,28 @@ export class NotionController {
   ) {}
 
   @HttpCode(HttpStatusCode.Ok)
-  @Post('integration')
-  integration(@Body() dto: NotionIntegrationDto, @GetUser() user: User) {
-    return this.notionService.getAccessToken(dto, user);
+  @Post('generate-access-token')
+  integration(@Body() dto: NotionIntegrationDto) {
+    return this.notionService.getAccessToken(dto);
   }
 
-  @Get('databases')
-  getDatabases(@GetUser() user: User) {
-    return this.notionService.connectToDatabase(user);
+  // fetch first database
+  @Get('database')
+  getDatabases(@Headers('access-token') accessToken: string) {
+    return this.notionService.getDatabase(accessToken);
   }
 
   @Post('bookmark-tweet')
-  async bookmarkTweet(@GetUser() user: User, @Body() dto: GetTweetDataDto) {
+  async bookmarkTweet(
+    @Headers('access-token') accessToken: string,
+    @Body() dto: GetTweetDataDto,
+  ) {
     const tweets = await this.twitterService.getTwitterData(dto.url, dto.type);
-    return this.notionService.createPage(user, tweets as TweetData[], dto.tags);
+    return this.notionService.createPage(
+      accessToken,
+      dto.databaseId,
+      tweets,
+      dto.tags,
+    );
   }
 }

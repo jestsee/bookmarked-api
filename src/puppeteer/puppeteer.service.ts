@@ -7,12 +7,21 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
   page: Page;
 
   async onModuleInit() {
-    this.browser = await puppeteer.launch({ headless: false });
-    this.page = await this.browser.newPage();
+    console.log('onModuleInit called');
+    this.browser = await puppeteer.launch({
+      headless: false,
+      args: [
+        '--single-process',
+        '--no-sandbox',
+        '--disable-features=site-per-process',
+      ],
+    });
+    this.page = this.browser.pages[0] ?? (await this.browser.newPage());
     await this.page.setViewport({ width: 1080, height: 1024 });
   }
 
   async onModuleDestroy() {
+    console.log('onModuleDestroy called');
     await this.browser.close();
   }
 

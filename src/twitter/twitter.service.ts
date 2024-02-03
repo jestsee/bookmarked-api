@@ -108,8 +108,9 @@ export class TwitterService {
         );
         this.puppeteer.page.on(
           'response',
-          async (response) =>
-            await this.getTwitterDataByNetworkHelper({
+          (response) =>
+            response.request().method().toUpperCase() != 'OPTIONS' &&
+            this.getTwitterDataByNetworkHelper({
               ...payload,
               response,
               url: newUrl,
@@ -128,8 +129,9 @@ export class TwitterService {
     const resultPromise = new Promise<TweetData[]>((resolve) => {
       this.puppeteer.page.on(
         'response',
-        async (response) =>
-          await this.getTwitterDataByNetworkHelper({
+        (response) =>
+          response.request().method().toUpperCase() != 'OPTIONS' &&
+          this.getTwitterDataByNetworkHelper({
             response,
             resolve,
             url,
