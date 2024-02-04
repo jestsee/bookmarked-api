@@ -1,8 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { NotionIntegrationDto } from './dto/notion-integration.dto';
-// import { PrismaService } from 'src/prisma/prisma.service';
-import { GetUser } from 'src/auth/decorator';
-import { User } from '@prisma/client';
 import { NotionSdkService } from 'src/notion-sdk/notion-sdk.service';
 import { TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';

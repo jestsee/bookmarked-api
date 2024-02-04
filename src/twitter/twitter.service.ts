@@ -94,13 +94,14 @@ export class TwitterService {
       console.log({ data });
       arrData.push(data);
 
+      this.puppeteer.page.removeAllListeners();
+
       // stop condition
       if (!isThread || !temp.legacy.in_reply_to_status_id_str) {
-        this.puppeteer.page.removeAllListeners();
         resolve(arrData.reverse());
       } else {
         // recursive function
-        this.puppeteer.page.removeAllListeners();
+        // this.puppeteer.page.removeAllListeners();
         await this.puppeteer.resetPage();
         const newUrl = this.generateNewUrl(
           url,
@@ -116,7 +117,8 @@ export class TwitterService {
               url: newUrl,
             }),
         );
-        await this.puppeteer.page.goto(newUrl);
+        await this.puppeteer.page.goto(newUrl, { waitUntil: 'load' });
+        console.log('masok sini gan masih hihi');
       }
     }
   }
