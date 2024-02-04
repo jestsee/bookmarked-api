@@ -95,6 +95,7 @@ export class TwitterService {
       arrData.push(data);
 
       this.puppeteer.page.removeAllListeners();
+      await this.puppeteer.resetPage();
 
       // stop condition
       if (!isThread || !temp.legacy.in_reply_to_status_id_str) {
@@ -102,7 +103,6 @@ export class TwitterService {
       } else {
         // recursive function
         // this.puppeteer.page.removeAllListeners();
-        await this.puppeteer.resetPage();
         const newUrl = this.generateNewUrl(
           url,
           temp.legacy.in_reply_to_status_id_str,
@@ -118,7 +118,6 @@ export class TwitterService {
             }),
         );
         await this.puppeteer.page.goto(newUrl, { waitUntil: 'load' });
-        console.log('masok sini gan masih hihi');
       }
     }
   }
