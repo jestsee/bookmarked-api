@@ -5,6 +5,7 @@ import { Client, LogLevel } from '@notionhq/client';
 import { INotionAccessToken } from 'src/notion/interface';
 import { TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';
+import { constructBlock } from './notion-sdk.util';
 
 @Injectable()
 export class NotionSdkService {
@@ -125,7 +126,11 @@ export class NotionSdkService {
             },
           ],
           children: [
-            { paragraph: { rich_text: [{ text: { content: tweet.text } }] } },
+            {
+              paragraph: {
+                rich_text: constructBlock(tweet.text, tweet.urls),
+              },
+            },
             ...tweet.photo.map((item) => ({
               image: { external: { url: item } },
             })),

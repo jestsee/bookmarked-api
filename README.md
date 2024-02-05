@@ -60,8 +60,8 @@ $ pnpm run test:cov
 
 ## TODOs
 
-- [ ] Error handler ([using exceptions](https://docs.nestjs.com/exception-filters))
-- [ ] Extract real url instead of t.co/...
+- [x] Error handler ([using exceptions](https://docs.nestjs.com/exception-filters))
+- [x] Extract real url instead of t.co/...
 - [ ] Extract quoted tweet
 - [ ] Handle [new tweet structure](https://twitter.com/mustafasegf/status/1737049910342828490) i.e text - img - text - img
 

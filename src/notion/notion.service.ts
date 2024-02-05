@@ -50,8 +50,6 @@ export class NotionService {
 
     await this.notionSdk.createBlock(accessToken, page.id, tweets);
 
-    return {
-      message: 'Tweet successfully bookmarked',
-    };
+    return { message: 'Tweet successfully bookmarked' };
   }
 }
