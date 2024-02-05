@@ -97,8 +97,6 @@ export class TwitterService {
         url,
         urls,
         media,
-        photo:
-          temp.legacy.entities.media?.map((item) => item.media_url_https) ?? [],
       };
 
       console.log({ data });

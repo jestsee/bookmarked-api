@@ -6,7 +6,6 @@ export interface TweetData {
   avatar?: string;
   text: string;
   url: string;
-  photo: string[];
   quotedTweet?: TweetData;
   urls: TweetUrl[];
   media: TweetMedia[];
@@ -18,7 +17,9 @@ export interface TweetUrl {
   url: string;
 }
 
-export type TweetMedia = TweetUrl;
+export interface TweetMedia extends TweetUrl {
+  media_url_https: string;
+}
 
 export interface GetTweetDataPayload {
   response: HTTPResponse;

@@ -131,8 +131,8 @@ export class NotionSdkService {
                 rich_text: constructBlock(tweet),
               },
             },
-            ...tweet.photo.map((item) => ({
-              image: { external: { url: item } },
+            ...tweet.media.map(({ media_url_https: url }) => ({
+              image: { external: { url } },
             })),
           ],
         },

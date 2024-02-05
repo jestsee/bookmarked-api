@@ -64,6 +64,7 @@ $ pnpm run test:cov
 - [x] Extract real url instead of t.co/...
 - [x] Hide image's link
 - [ ] Extract quoted tweet
+- [ ] Fix title
 - [ ] Handle [new tweet structure](https://twitter.com/mustafasegf/status/1737049910342828490) i.e text - img - text - img
 
 ## Support
