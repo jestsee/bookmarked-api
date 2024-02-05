@@ -20,23 +20,6 @@ export class NotionService {
       // get the access token
       const tokenInfo = response.data;
 
-      // update or store notion token info on db
-      // const notionData = {
-      //   accessToken: tokenInfo.access_token,
-      //   botId: tokenInfo.bot_id,
-      //   duplicatedTemplateId: tokenInfo.duplicate_template_id,
-      //   tokenType: tokenInfo.token_type,
-      //   workspaceId: tokenInfo.workspace_id,
-      //   workspaceName: tokenInfo.workspace_name,
-      //   userId: user.id,
-      // };
-
-      // await this.prisma.notion.upsert({
-      //   where: { userId: user.id },
-      //   create: notionData,
-      //   update: notionData,
-      // });
-
       return { access_token: tokenInfo.access_token };
     } catch (error) {
       throw new BadRequestException(
@@ -46,33 +29,16 @@ export class NotionService {
   }
 
   async getDatabase(accessToken: string) {
-    // const { accessToken, id } = await this.prisma.notion.findUnique({
-    //   where: { userId: user.id },
-    //   select: { accessToken: true, id: true },
-    // });
     const [database] = (await this.notionSdk.getDatabases(accessToken)).results;
-
-    // update notion info on db
-    // const updatedData = await this.prisma.notion.update({
-    //   where: { id },
-    //   data: { databaseId: database.id },
-    // });
-
-    // TODO only save the id from database which has required properties
     return database;
   }
 
   async createPage(
-    // @GetUser() user: User,
     accessToken: string,
     databaseId: string,
     tweets: TweetData[],
     tag: string[] = [],
   ) {
-    // const { accessToken, databaseId } = await this.prisma.notion.findUnique({
-    //   where: { userId: user.id },
-    //   select: { accessToken: true, databaseId: true },
-    // });
     const firstTweet = tweets.at(0);
     const page = await this.notionSdk.createPage(
       accessToken,

@@ -8,7 +8,7 @@ import {
 import { NotionService } from './notion.service';
 import { NotionController } from './notion.controller';
 import { TwitterModule } from 'src/twitter/twitter.module';
-import { NotionAccessTokenMiddleware } from 'src/middleware/notionAccessToken.middleware';
+import { NotionAccessTokenMiddleware } from 'src/middleware/notion-access-token.middleware';
 
 @Global()
 @Module({

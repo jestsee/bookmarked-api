@@ -13,7 +13,7 @@ export class NotionSdkService {
     private config: ConfigService,
     private readonly httpService: HttpService,
   ) {
-    this.client = new Client({ logLevel: LogLevel.DEBUG });
+    this.client = new Client({ logLevel: LogLevel.DEBUG }); // TODO remove logger
   }
 
   async createToken(code: string) {
