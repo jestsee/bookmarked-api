@@ -110,7 +110,7 @@ export class TwitterService {
               url: newUrl,
             }),
         );
-        await this.puppeteer.page.goto(newUrl, { waitUntil: 'load' });
+        await this.puppeteer.page.goto(newUrl);
       }
     }
   }

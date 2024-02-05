@@ -5,7 +5,7 @@ import { Client, LogLevel } from '@notionhq/client';
 import { INotionAccessToken } from 'src/notion/interface';
 import { TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';
-import { constructCallout } from './notion-sdk.util';
+import { constructCallout, constructRichText } from './notion-sdk.util';
 
 @Injectable()
 export class NotionSdkService {
@@ -71,7 +71,7 @@ export class NotionSdkService {
         },
       },
       properties: {
-        Tweet: { title: [{ text: { content: tweet.text } }] },
+        Tweet: { title: constructRichText(tweet) },
         Type: {
           select: { name: type.charAt(0).toUpperCase() + type.slice(1) },
         },
