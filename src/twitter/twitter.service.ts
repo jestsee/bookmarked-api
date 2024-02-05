@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
-import { GetTweetDataPayload, TweetData, TweetUrl } from './interface';
+import {
+  GetTweetDataPayload,
+  TweetData,
+  TweetMedia,
+  TweetUrl,
+} from './interface';
 import { TwitterDataType } from './dto';
 
 @Injectable()
@@ -79,7 +84,9 @@ export class TwitterService {
       const resp = await response.json();
       const temp = resp.data.tweetResult.result;
       const userData = temp.core.user_results.result.legacy;
-      const urls = temp.legacy.entities.urls as TweetUrl[];
+
+      const urls = (temp.legacy.entities.urls ?? []) as TweetUrl[];
+      const media = (temp.legacy.entities.media ?? []) as TweetMedia[];
 
       // construct data
       const data = {
@@ -89,6 +96,7 @@ export class TwitterService {
         text: temp.legacy.full_text,
         url,
         urls,
+        media,
         photo:
           temp.legacy.entities.media?.map((item) => item.media_url_https) ?? [],
       };

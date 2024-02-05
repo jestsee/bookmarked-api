@@ -9,6 +9,7 @@ export interface TweetData {
   photo: string[];
   quotedTweet?: TweetData;
   urls: TweetUrl[];
+  media: TweetMedia[];
 }
 
 export interface TweetUrl {
@@ -16,6 +17,8 @@ export interface TweetUrl {
   expanded_url: string;
   url: string;
 }
+
+export type TweetMedia = TweetUrl;
 
 export interface GetTweetDataPayload {
   response: HTTPResponse;

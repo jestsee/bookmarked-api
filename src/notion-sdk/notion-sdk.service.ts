@@ -128,7 +128,7 @@ export class NotionSdkService {
           children: [
             {
               paragraph: {
-                rich_text: constructBlock(tweet.text, tweet.urls),
+                rich_text: constructBlock(tweet),
               },
             },
             ...tweet.photo.map((item) => ({
