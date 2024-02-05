@@ -1,6 +1,7 @@
+import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
 
-export const constructBlock = ({ text, urls, media }: TweetData) => {
+export const constructRichText = ({ text, urls, media }: TweetData) => {
   const result = [];
   let lastIndex = 0;
 
@@ -33,7 +34,57 @@ export const constructBlock = ({ text, urls, media }: TweetData) => {
   return result;
 };
 
-const constructText = (text: string, url?: string) => ({
+export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
+  const children = [
+    {
+      paragraph: {
+        rich_text: constructRichText(tweet),
+      },
+    },
+    // media
+    ...tweet.media.map(({ media_url_https: url }) => ({
+      image: { external: { url } },
+    })),
+  ];
+
+  // quoted tweet
+  if (tweet.quotedTweet) {
+    children.push(constructCallout(tweet.quotedTweet) as any);
+  }
+
+  return {
+    callout: {
+      icon: {
+        type: 'external',
+        external: {
+          url: tweet.avatar,
+        },
+      },
+      color: 'default',
+      rich_text: [
+        {
+          type: 'text',
+          text: {
+            content: tweet.name,
+          },
+          annotations: {
+            bold: true,
+          },
+        },
+        {
+          type: 'text',
+          text: {
+            content: '@' + tweet.username,
+            link: { url: tweet.url },
+          },
+        },
+      ],
+      children,
+    },
+  };
+};
+
+export const constructText = (text: string, url?: string) => ({
   text: { content: text, ...(url && { link: { url } }) },
 });
 

@@ -5,7 +5,7 @@ import { Client, LogLevel } from '@notionhq/client';
 import { INotionAccessToken } from 'src/notion/interface';
 import { TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';
-import { constructBlock } from './notion-sdk.util';
+import { constructCallout } from './notion-sdk.util';
 
 @Injectable()
 export class NotionSdkService {
@@ -97,46 +97,7 @@ export class NotionSdkService {
     return this.client.blocks.children.append({
       auth: accessToken,
       block_id: blockId,
-      children: tweets.map((tweet) => ({
-        type: 'callout',
-        callout: {
-          icon: {
-            type: 'external',
-            external: {
-              url: tweet.avatar,
-            },
-          },
-          color: 'default',
-          rich_text: [
-            {
-              type: 'text',
-              text: {
-                content: tweet.name,
-              },
-              annotations: {
-                bold: true,
-              },
-            },
-            {
-              type: 'text',
-              text: {
-                content: '@' + tweet.username,
-                link: { url: tweet.url },
-              },
-            },
-          ],
-          children: [
-            {
-              paragraph: {
-                rich_text: constructBlock(tweet),
-              },
-            },
-            ...tweet.media.map(({ media_url_https: url }) => ({
-              image: { external: { url } },
-            })),
-          ],
-        },
-      })),
+      children: tweets.map((tweet) => constructCallout(tweet)),
     });
   }
 }

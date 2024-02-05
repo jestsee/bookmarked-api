@@ -7,6 +7,7 @@ import {
   TweetUrl,
 } from './interface';
 import { TwitterDataType } from './dto';
+import { extractTwitterData } from './twitter.util';
 
 @Injectable()
 export class TwitterService {
@@ -81,23 +82,10 @@ export class TwitterService {
     const { arrData, isThread, resolve, response, url } = payload;
     if (response.url().includes('graphql')) {
       // deconstruct response
-      const resp = await response.json();
-      const temp = resp.data.tweetResult.result;
-      const userData = temp.core.user_results.result.legacy;
-
-      const urls = (temp.legacy.entities.urls ?? []) as TweetUrl[];
-      const media = (temp.legacy.entities.media ?? []) as TweetMedia[];
-
-      // construct data
-      const data = {
-        name: userData.name,
-        username: userData.screen_name,
-        avatar: userData.profile_image_url_https,
-        text: temp.legacy.full_text,
-        url,
-        urls,
-        media,
-      };
+      const _response = await response.json();
+      const parentTweet =
+        _response.data.tweetResult.result.legacy.in_reply_to_status_id_str;
+      const data = extractTwitterData(_response.data.tweetResult, url);
 
       console.log({ data });
       arrData.push(data);
@@ -106,15 +94,12 @@ export class TwitterService {
       await this.puppeteer.resetPage();
 
       // stop condition
-      if (!isThread || !temp.legacy.in_reply_to_status_id_str) {
+      if (!isThread || !parentTweet) {
         resolve(arrData.reverse());
       } else {
         // recursive function
         // this.puppeteer.page.removeAllListeners();
-        const newUrl = this.generateNewUrl(
-          url,
-          temp.legacy.in_reply_to_status_id_str,
-        );
+        const newUrl = this.generateNewUrl(url, parentTweet);
         this.puppeteer.page.on(
           'response',
           (response) =>
