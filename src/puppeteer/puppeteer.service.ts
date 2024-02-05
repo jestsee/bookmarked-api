@@ -6,12 +6,14 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
   private browser: Browser;
   page: Page;
 
+  // reference
+  // https://blog.logrocket.com/setting-headless-chrome-node-js-server-docker/
   async onModuleInit() {
     console.log('onModuleInit called');
     this.browser = await puppeteer.launch({
-      headless: false,
-      // executablePath: '/usr/bin/chromium-browser',
-      // args: ['--no-sandbox'],
+      headless: true,
+      executablePath: '/usr/bin/google-chrome',
+      args: ['--no-sandbox', '--disable-gpu'],
     });
     this.page = await this.browser.newPage();
     await this.page.setViewport({ width: 1080, height: 1024 });

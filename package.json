@@ -13,7 +13,7 @@
     "db:dev:up": "docker compose up dev-db -d",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:build": "docker build -t bookmarked .",
+    "docker:build": "docker build -t jestsee/bookmarked .",
     "docker:run": "docker run -p 3000:3000 bookmarked",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
