@@ -37,7 +37,6 @@ export const constructRichText = ({ text, urls, media }: TweetData) => {
 export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
   const children = [
     ...constructCalloutContent(tweet),
-    // media
     ...tweet.media.map(({ media_url_https: url }) => constructImage(url)),
     ...tweet.urls.map(({ expanded_url: url }) => constructBookmark(url)),
   ];
@@ -69,7 +68,7 @@ export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
         {
           type: 'text',
           text: {
-            content: '@' + tweet.username,
+            content: ' @' + tweet.username,
             link: { url: tweet.url },
           },
         },

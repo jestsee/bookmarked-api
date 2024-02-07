@@ -27,14 +27,15 @@ const extractTweetContent = (result: any) => {
 
   if (result.note_tweet?.note_tweet_results?.result) {
     const { result: noteTweetResult } = result.note_tweet.note_tweet_results;
-    const { media: noteTweetMedia } = noteTweetResult;
-    const { inline_media }: { inline_media: InlineMedia[] } = noteTweetMedia;
+    const noteTweetInlineMedia: InlineMedia[] =
+      noteTweetResult.media?.inline_media ?? [];
+    const noteTweetUrls = noteTweetResult.entity_set.urls;
 
     let modifiedText = noteTweetResult.text ?? '';
     let currentMediaIndex = 0;
     const inlineMedia = [];
 
-    inline_media.forEach((inlineMediaItem) => {
+    noteTweetInlineMedia.forEach((inlineMediaItem) => {
       const matchedMedia = media.find(
         (mediaItem) => mediaItem.id_str === inlineMediaItem.media_id,
       );
@@ -47,7 +48,12 @@ const extractTweetContent = (result: any) => {
       inlineMedia.push(matchedMedia.media_url_https);
     });
 
-    return { text: modifiedText, urls, inlineMedia, media: [] };
+    return {
+      inlineMedia,
+      text: modifiedText,
+      urls: noteTweetUrls.length > 0 ? noteTweetUrls : urls,
+      media: inlineMedia.length > 0 ? [] : media,
+    };
   }
 
   const text = result.legacy.full_text;
