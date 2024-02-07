@@ -39,6 +39,7 @@ export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
     ...constructCalloutContent(tweet),
     // media
     ...tweet.media.map(({ media_url_https: url }) => constructImage(url)),
+    ...tweet.urls.map(({ expanded_url: url }) => constructBookmark(url)),
   ];
 
   // quoted tweet
@@ -132,6 +133,10 @@ export const constructParagraph = (tweet: TweetData) => ({
 
 export const constructImage = (url: string) => ({
   image: { external: { url } },
+});
+
+export const constructBookmark = (url: string) => ({
+  bookmark: { url },
 });
 
 const removeMediaUrls = (media: TweetMedia[], text: string) => {
