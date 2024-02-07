@@ -13,7 +13,11 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
     this.browser = await puppeteer.launch({
       headless: true,
       // executablePath: '/usr/bin/google-chrome',
-      args: ['--no-sandbox', '--disable-gpu'],
+      args: [
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-features=site-per-process',
+      ],
     });
     this.page = await this.browser.newPage();
     await this.page.setViewport({ width: 1080, height: 1024 });

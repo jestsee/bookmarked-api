@@ -5,6 +5,7 @@ export const extractTweetData = (
   url: string,
 ): TweetData => {
   const { result } = twitterResponse;
+  if (!result) return;
   const userData = result.core.user_results.result.legacy;
 
   const tweetContent = extractTweetContent(result);
