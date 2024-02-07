@@ -71,7 +71,12 @@ export class NotionSdkService {
         },
       },
       properties: {
-        Tweet: { title: constructRichText(tweet) },
+        Tweet: {
+          title: constructRichText({
+            ...tweet,
+            text: tweet.text.substring(0, 2000),
+          }),
+        },
         Type: {
           select: { name: type.charAt(0).toUpperCase() + type.slice(1) },
         },

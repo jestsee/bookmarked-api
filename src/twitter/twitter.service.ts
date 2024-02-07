@@ -7,7 +7,7 @@ import {
   TweetUrl,
 } from './interface';
 import { TwitterDataType } from './dto';
-import { extractTwitterData } from './twitter.util';
+import { extractTweetData } from './twitter.util';
 
 @Injectable()
 export class TwitterService {
@@ -40,7 +40,6 @@ export class TwitterService {
           });
         },
       );
-      console.log({ arrUrl });
       return arrUrl;
     } catch (error) {
       return [];
@@ -85,7 +84,7 @@ export class TwitterService {
       const _response = await response.json();
       const parentTweet =
         _response.data.tweetResult.result.legacy.in_reply_to_status_id_str;
-      const data = extractTwitterData(_response.data.tweetResult, url);
+      const data = extractTweetData(_response.data.tweetResult, url);
 
       console.log({ data });
       arrData.push(data);
@@ -98,7 +97,6 @@ export class TwitterService {
         resolve(arrData.reverse());
       } else {
         // recursive function
-        // this.puppeteer.page.removeAllListeners();
         const newUrl = this.generateNewUrl(url, parentTweet);
         this.puppeteer.page.on(
           'response',
