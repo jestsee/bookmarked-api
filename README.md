@@ -66,9 +66,10 @@ $ pnpm run test:cov
 - [x] Extract quoted tweet
 - [x] Fix title
 - [x] Handle [new tweet structure](https://twitter.com/mustafasegf/status/1737049910342828490) i.e text - img - text - img
-- [x] Limit title's character
 - [x] Display bookmark by url
 - [x] Handle navigation frame detached error
+- [ ] Limit title's character
+- [ ] Replace special characters (i.e `&amp;`, `&gt;`)
 - [ ] Handle requesting frame too early error
 - [ ] Build notion's object type (i.e Callout, Rich Text, etc)
 
