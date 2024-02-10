@@ -70,6 +70,8 @@ $ pnpm run test:cov
 - [x] Handle navigation frame detached error
 - [ ] Limit title's character
 - [ ] Replace special characters (i.e `&amp;`, `&gt;`)
+- [ ] Extract preview link's thumbnail image
+- [ ] Extract time & date
 - [ ] Handle requesting frame too early error
 - [ ] Build notion's object type (i.e Callout, Rich Text, etc)
 
