@@ -68,8 +68,8 @@ $ pnpm run test:cov
 - [x] Handle [new tweet structure](https://twitter.com/mustafasegf/status/1737049910342828490) i.e text - img - text - img
 - [x] Display bookmark by url
 - [x] Handle navigation frame detached error
-- [ ] Limit title's character
-- [ ] Replace special characters (i.e `&amp;`, `&gt;`)
+- [x] Limit title's character
+- [x] Replace special characters (i.e `&amp;`, `&gt;`)
 - [ ] Extract preview link's thumbnail image
 - [ ] Extract time & date
 - [ ] Handle requesting frame too early error

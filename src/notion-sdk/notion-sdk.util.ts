@@ -1,22 +1,21 @@
 import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
+import { CHARACTER_ENTITIES_MAP } from './notion-sdk.constant';
 
 export const constructRichText = ({ text, urls, media }: TweetData) => {
   const result = [];
   let lastIndex = 0;
 
-  const textWithoutMediaUrl = removeMediaUrls(media, text);
+  const cleanText = removeSpecialCharacters(removeMediaUrls(media, text));
 
   urls.forEach((item) => {
     const pattern = new RegExp(`(${item.url})`, 'g');
     let match: RegExpExecArray;
 
-    while ((match = pattern.exec(textWithoutMediaUrl)) !== null) {
+    while ((match = pattern.exec(cleanText)) !== null) {
       // Add the text before the match as a separate object
       if (match.index > lastIndex) {
-        result.push(
-          constructText(textWithoutMediaUrl.substring(lastIndex, match.index)),
-        );
+        result.push(constructText(cleanText.substring(lastIndex, match.index)));
       }
 
       // Add the matched text with the link
@@ -28,8 +27,8 @@ export const constructRichText = ({ text, urls, media }: TweetData) => {
   });
 
   // Add the remaining text after the last match
-  if (lastIndex < textWithoutMediaUrl.length) {
-    result.push(constructText(textWithoutMediaUrl.substring(lastIndex)));
+  if (lastIndex < cleanText.length) {
+    result.push(constructText(cleanText.substring(lastIndex)));
   }
   return result;
 };
@@ -145,4 +144,24 @@ const removeMediaUrls = (media: TweetMedia[], text: string) => {
     .split(' ')
     .filter((word) => !mediasToRemove.has(word))
     .join(' ');
+};
+
+const removeSpecialCharacters = (text: string): string => {
+  const pattern = new RegExp(
+    `&(${Object.keys(CHARACTER_ENTITIES_MAP).join('|')});`,
+    'g',
+  );
+
+  return text.replace(pattern, (_, entity) => CHARACTER_ENTITIES_MAP[entity]);
+};
+
+export const trimTitleText = (text: string): string => {
+  const stopperIndex = text.indexOf('\n');
+  const modifiedText = text.substring(0, stopperIndex);
+
+  // if (modifiedText.length > MAX_CHARACTERS) {
+  //   return modifiedText.substring(0, MAX_CHARACTERS) + '...';
+  // }
+
+  return modifiedText;
 };

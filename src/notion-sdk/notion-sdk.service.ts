@@ -5,7 +5,11 @@ import { Client, LogLevel } from '@notionhq/client';
 import { INotionAccessToken } from 'src/notion/interface';
 import { TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';
-import { constructCallout, constructRichText } from './notion-sdk.util';
+import {
+  constructCallout,
+  constructRichText,
+  trimTitleText,
+} from './notion-sdk.util';
 
 @Injectable()
 export class NotionSdkService {
@@ -74,7 +78,7 @@ export class NotionSdkService {
         Tweet: {
           title: constructRichText({
             ...tweet,
-            text: tweet.text.substring(0, 2000),
+            text: trimTitleText(tweet.text.substring(0, 2000)),
           }),
         },
         Type: {
