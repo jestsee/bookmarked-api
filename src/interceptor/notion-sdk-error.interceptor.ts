@@ -16,8 +16,10 @@ export class NotionSDKErrorInterceptor implements NestInterceptor {
       catchError((error) =>
         throwError(() => {
           if (error instanceof APIResponseError) {
+            console.log('[APIResponseError]', error);
             return new NotionException(error);
           }
+          console.log('[Other Error]', error);
           return error;
         }),
       ),

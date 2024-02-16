@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
-import {
-  GetTweetDataPayload,
-  TweetData,
-  TweetMedia,
-  TweetUrl,
-} from './interface';
+import { GetTweetDataPayload, TweetData } from './interface';
 import { TwitterDataType } from './dto';
 import { extractTweetData } from './twitter.util';
 

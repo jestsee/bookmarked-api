@@ -1,4 +1,5 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import puppeteer, { Browser, Page } from 'puppeteer';
 
 @Injectable()
@@ -6,13 +7,15 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
   private browser: Browser;
   page: Page;
 
+  constructor(private configService: ConfigService) {}
+
   // reference
   // https://blog.logrocket.com/setting-headless-chrome-node-js-server-docker/
   async onModuleInit() {
     console.log('onModuleInit called');
     this.browser = await puppeteer.launch({
       headless: true,
-      // executablePath: '/usr/bin/google-chrome',
+      executablePath: this.configService.get<string>('BROWSER_PATH'),
       args: [
         '--no-sandbox',
         '--disable-gpu',

@@ -10,7 +10,6 @@ import { TwitterModule } from './twitter/twitter.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env.local',
       isGlobal: true,
     }),
     NotionModule,
