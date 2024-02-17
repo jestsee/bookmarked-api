@@ -6,26 +6,15 @@ import { TweetData } from 'src/twitter/interface';
 
 @Injectable()
 export class NotionService {
-  constructor(
-    // private prisma: PrismaService,
-    private readonly notionSdk: NotionSdkService,
-  ) {}
+  constructor(private readonly notionSdk: NotionSdkService) {}
   // https://developers.notion.com/docs/authorization#prompt-for-a-standard-integration-with-no-template-option-default
   async getAccessToken({ code }: NotionIntegrationDto): Promise<{
     access_token: string;
   }> {
-    try {
-      const response = await this.notionSdk.createToken(code);
+    const response = await this.notionSdk.createToken(code);
+    const { access_token } = response.data;
 
-      // get the access token
-      const tokenInfo = response.data;
-
-      return { access_token: tokenInfo.access_token };
-    } catch (error) {
-      throw new BadRequestException(
-        error.response.data.error_description as string,
-      );
-    }
+    return { access_token };
   }
 
   async getDatabase(accessToken: string) {
