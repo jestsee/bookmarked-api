@@ -70,6 +70,8 @@ $ pnpm run test:cov
 - [x] Handle navigation frame detached error
 - [x] Limit title's character
 - [x] Replace special characters (i.e `&amp;`, `&gt;`)
+- [ ] Limit paragraph to 2000 limit characters ([tweet link](https://twitter.com/fireship_dev/status/1756734500510503078))
+- [ ] Handle empty title ([tweet link](https://twitter.com/mattpocockuk/status/1758462375139627241))
 - [ ] Extract preview link's thumbnail image
 - [ ] Extract time & date
 - [ ] Handle requesting frame too early error
