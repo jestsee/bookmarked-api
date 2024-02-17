@@ -45,26 +45,12 @@ $ pnpm run start:dev
 $ pnpm run start:prod
 ```
 
-## Test
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
 ## TODOs
 
 - [x] Error handler ([using exceptions](https://docs.nestjs.com/exception-filters))
 - [x] Extract real url instead of t.co/...
 - [x] Hide image's link
 - [x] Extract quoted tweet
-- [x] Fix title
 - [x] Handle [new tweet structure](https://twitter.com/mustafasegf/status/1737049910342828490) i.e text - img - text - img
 - [x] Display bookmark by url
 - [x] Handle navigation frame detached error
@@ -72,6 +58,7 @@ $ pnpm run test:cov
 - [x] Replace special characters (i.e `&amp;`, `&gt;`)
 - [ ] Limit paragraph to 2000 limit characters ([tweet link](https://twitter.com/fireship_dev/status/1756734500510503078))
 - [ ] Handle empty title ([tweet link](https://twitter.com/mattpocockuk/status/1758462375139627241))
+- [ ] Handle twitter rate limit & long scrape time ([tweet link](https://twitter.com/lakamarta/status/1758687805897871502))
 - [ ] Extract preview link's thumbnail image
 - [ ] Extract time & date
 - [ ] Handle requesting frame too early error
