@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { NotionIntegrationDto } from './dto/notion-integration.dto';
 import { NotionSdkService } from 'src/notion-sdk/notion-sdk.service';
 import { TwitterDataType } from 'src/twitter/dto';
