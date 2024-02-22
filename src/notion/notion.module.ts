@@ -23,10 +23,16 @@ export class NotionModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(NotionAccessTokenMiddleware)
-      .exclude({
-        path: 'notion/generate-access-token',
-        method: RequestMethod.POST,
-      })
+      .exclude(
+        {
+          path: 'notion/generate-access-token',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'notion/bookmark-tweet/:taskId/progress',
+          method: RequestMethod.GET,
+        },
+      )
       .forRoutes('notion/*');
   }
 }
