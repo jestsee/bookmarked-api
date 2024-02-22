@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotionModule } from './notion/notion.module';
@@ -14,10 +14,13 @@ import { BullModule } from '@nestjs/bull';
       isGlobal: true,
     }),
     BullModule.forRootAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
         redis: {
-          host: 'localhost',
-          port: 6379,
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+          password: configService.get<string>('REDIS_PASSWORD'),
         },
         defaultJobOptions: {
           removeOnComplete: 100,

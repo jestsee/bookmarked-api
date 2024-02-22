@@ -13,13 +13,13 @@ import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 
 // @UseGuards(JwtGuard)
 @Controller('notion')
 export class NotionController {
   constructor(
-    // TODO extract 'notion' as constant
-    @InjectQueue('notion') private readonly notionQueue: Queue,
+    @InjectQueue(NOTION) private readonly notionQueue: Queue,
     private notionService: NotionService,
   ) {}
 
@@ -40,7 +40,7 @@ export class NotionController {
     @Headers('access-token') accessToken: string,
     @Body() dto: GetTweetDataDto,
   ) {
-    const job = await this.notionQueue.add('notion-job', {
+    const job = await this.notionQueue.add(NOTION_JOB, {
       ...dto,
       accessToken,
     });
@@ -51,10 +51,10 @@ export class NotionController {
   async checkProgress(@Param('taskId') taskId: string) {
     const job = await this.notionQueue.getJob(taskId);
 
-    if (!job) return { status: 'not_found' };
-    if (job.failedReason) return { status: 'failed' };
-    if (job.finishedOn) return { status: 'completed' };
+    if (!job) return { status: JOB_STATUS.NOT_FOUND };
+    if (job.failedReason) return { status: JOB_STATUS.FAILED }; // TODO failed reason?
+    if (job.finishedOn) return { status: JOB_STATUS.COMPLETED };
 
-    return { status: 'on_progress' };
+    return { status: JOB_STATUS.ON_PROGRESS };
   }
 }

@@ -1,16 +1,17 @@
-import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
+import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import { TwitterService } from 'src/twitter/twitter.service';
 import { NotionService } from './notion.service';
+import { NOTION, NOTION_JOB } from './notion.constant';
 
-@Processor('notion')
+@Processor(NOTION)
 export class NotionConsumer {
   constructor(
     private notionService: NotionService,
     private twitterService: TwitterService,
   ) {}
 
-  @Process('notion-job')
+  @Process(NOTION_JOB)
   async bookmarkTweet(job: Job) {
     const tweets = await this.twitterService.getTwitterData(
       job.data.url,
