@@ -1,16 +1,26 @@
-import { Body, Controller, Get, Headers, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { NotionService } from './notion.service';
-import { TwitterService } from 'src/twitter/twitter.service';
 import { GetTweetDataDto } from 'src/twitter/dto';
 import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 // @UseGuards(JwtGuard)
 @Controller('notion')
 export class NotionController {
   constructor(
+    // TODO extract 'notion' as constant
+    @InjectQueue('notion') private readonly notionQueue: Queue,
     private notionService: NotionService,
-    private twitterService: TwitterService,
   ) {}
 
   @HttpCode(HttpStatusCode.Ok)
@@ -30,12 +40,21 @@ export class NotionController {
     @Headers('access-token') accessToken: string,
     @Body() dto: GetTweetDataDto,
   ) {
-    const tweets = await this.twitterService.getTwitterData(dto.url, dto.type);
-    return this.notionService.createPage(
+    const job = await this.notionQueue.add('notion-job', {
+      ...dto,
       accessToken,
-      dto.databaseId,
-      tweets,
-      dto.tags,
-    );
+    });
+    return { id: job.id };
+  }
+
+  @Get('bookmark-tweet/:taskId/progress')
+  async checkProgress(@Param('taskId') taskId: string) {
+    const job = await this.notionQueue.getJob(taskId);
+
+    if (!job) return { status: 'not_found' };
+    if (job.failedReason) return { status: 'failed' };
+    if (job.finishedOn) return { status: 'completed' };
+
+    return { status: 'on_progress' };
   }
 }
