@@ -81,7 +81,7 @@ export class TwitterService {
         _response.data.tweetResult.result.legacy.in_reply_to_status_id_str;
       const data = extractTweetData(_response.data.tweetResult, url);
 
-      console.log({ data });
+      console.log({ data, length: arrData.length });
       arrData.push(data);
 
       this.puppeteer.page.removeAllListeners();

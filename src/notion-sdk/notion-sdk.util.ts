@@ -157,6 +157,9 @@ const removeSpecialCharacters = (text: string): string => {
 
 export const trimTitleText = (text: string): string => {
   const stopperIndex = text.indexOf('\n');
+
+  if (stopperIndex === -1) return text;
+
   const modifiedText = text.substring(0, stopperIndex);
 
   // if (modifiedText.length > MAX_CHARACTERS) {
