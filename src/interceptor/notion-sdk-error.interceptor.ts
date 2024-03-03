@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
   BadRequestException,
+  HttpException,
 } from '@nestjs/common';
 import { APIResponseError } from '@notionhq/client';
 import { Observable, throwError } from 'rxjs';
@@ -16,10 +17,15 @@ export class NotionSDKErrorInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) =>
         throwError(() => {
-          console.error(error);
+          console.error('[ERROR]', error);
           if (error instanceof APIResponseError) {
             return new NotionException(error);
           }
+
+          if (error instanceof HttpException) {
+            return error;
+          }
+
           return new BadRequestException(
             error.response?.data?.error_description ?? 'Something went wrong',
           );

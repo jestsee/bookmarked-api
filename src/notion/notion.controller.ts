@@ -4,8 +4,11 @@ import {
   Get,
   Headers,
   HttpCode,
+  NotFoundException,
   Param,
+  Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { NotionService } from './notion.service';
 import { GetTweetDataDto } from 'src/twitter/dto';
@@ -13,7 +16,8 @@ import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
+import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
+import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
 
 // @UseGuards(JwtGuard)
 @Controller('notion')
@@ -47,14 +51,37 @@ export class NotionController {
     return { id: job.id };
   }
 
-  @Get('bookmark-tweet/:taskId/progress')
+  @Get('bookmark-tweet/:taskId/status')
   async checkProgress(@Param('taskId') taskId: string) {
     const job = await this.notionQueue.getJob(taskId);
 
-    if (!job) return { status: JOB_STATUS.NOT_FOUND };
-    if (job.failedReason) return { status: JOB_STATUS.FAILED }; // TODO failed reason?
-    if (job.finishedOn) return { status: JOB_STATUS.COMPLETED };
+    if (!job) throw new NotFoundException('Task not found');
 
-    return { status: JOB_STATUS.ON_PROGRESS };
+    const {
+      failedReason,
+      data: { type, url },
+    } = job;
+
+    const jobStatus = await job.getState();
+
+    const status = MAP_JOB_STATUS[jobStatus] ?? MAP_JOB_STATUS.default;
+    return {
+      status,
+      type,
+      url,
+      ...(failedReason && { message: failedReason }),
+    };
+  }
+
+  @Patch('bookmark-tweet/:taskId/retry')
+  @UseInterceptors(RetryErrorInterceptor)
+  async tryAgain(@Param('taskId') taskId: string) {
+    const job = await this.notionQueue.getJob(taskId);
+
+    if (!job) throw new NotFoundException('Task not found');
+
+    await job.retry();
+
+    return { message: 'In the process of retrying' };
   }
 }
