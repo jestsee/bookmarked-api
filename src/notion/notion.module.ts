@@ -29,8 +29,12 @@ export class NotionModule implements NestModule {
           method: RequestMethod.POST,
         },
         {
-          path: 'notion/bookmark-tweet/:taskId/progress',
+          path: 'notion/bookmark-tweet/:taskId/status',
           method: RequestMethod.GET,
+        },
+        {
+          path: 'notion/bookmark-tweet/:taskId/retry',
+          method: RequestMethod.PATCH,
         },
       )
       .forRoutes('notion/*');
