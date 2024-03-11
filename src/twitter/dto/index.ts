@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export enum TwitterDataType {
   TWEET = 'tweet',
@@ -11,6 +17,10 @@ export class GetTweetDataDto {
   databaseId: string;
 
   @IsString()
+  @IsUrl(
+    { host_whitelist: ['twitter.com', 'x.com'] },
+    { message: 'URL must be a valid tweet URL' },
+  )
   @IsNotEmpty()
   url: string;
 

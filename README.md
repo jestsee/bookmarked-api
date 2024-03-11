@@ -59,7 +59,6 @@ $ pnpm run start:prod
 - [x] Handle empty title ([tweet link](https://twitter.com/mattpocockuk/status/1758462375139627241))
 - [x] Handle twitter rate limit & long scrape time ([tweet link](https://twitter.com/lakamarta/status/1758687805897871502))
 - [x] Extract time & date (tweetResult > result > legacy > createdAt)
-- [ ] Add verified icon☑️ (result > is_blue_verified)
 - [ ] Only able to retry based on specific conditions
 
 ```
@@ -71,6 +70,7 @@ $ pnpm run start:prod
 }
 ```
 
+- [ ] Add verified icon☑️ (result > is_blue_verified)
 - [ ] Add more worker to scrape faster
 - [ ] Limit paragraph to 2000 limit characters ([tweet link](https://twitter.com/fireship_dev/status/1756734500510503078))
 - [ ] Extract preview link's thumbnail image

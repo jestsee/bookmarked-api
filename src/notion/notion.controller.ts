@@ -43,8 +43,14 @@ export class NotionController {
     @Headers('access-token') accessToken: string,
     @Body() dto: GetTweetDataDto,
   ) {
+    let { url } = dto;
+    const PROTOCOLS = 'https://';
+    if (!url.includes(PROTOCOLS)) {
+      url = PROTOCOLS + url;
+    }
     const job = await this.notionQueue.add(NOTION_JOB, {
       ...dto,
+      url,
       accessToken,
     });
     return { id: job.id };
