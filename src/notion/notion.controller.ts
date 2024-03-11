@@ -19,7 +19,6 @@ import { Queue } from 'bull';
 import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
 
-// @UseGuards(JwtGuard)
 @Controller('notion')
 export class NotionController {
   constructor(

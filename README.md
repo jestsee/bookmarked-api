@@ -57,13 +57,14 @@ $ pnpm run start:prod
 - [x] Limit title's character
 - [x] Replace special characters (i.e `&amp;`, `&gt;`)
 - [x] Handle empty title ([tweet link](https://twitter.com/mattpocockuk/status/1758462375139627241))
+- [ ] Extract time & date (tweetResult > result > legacy > createdAt)
+- [ ] Add verified icon☑️ (result > is_blue_verified)
 - [ ] Add more worker to scrape faster
-- [ ] Handle twitter rate limit & long scrape time ([tweet link](https://twitter.com/lakamarta/status/1758687805897871502))
+- [x] Handle twitter rate limit & long scrape time ([tweet link](https://twitter.com/lakamarta/status/1758687805897871502))
 - [ ] Limit paragraph to 2000 limit characters ([tweet link](https://twitter.com/fireship_dev/status/1756734500510503078))
 - [ ] Extract preview link's thumbnail image
-- [ ] Extract time & date
 - [ ] Handle requesting frame too early error
-- [ ] Build notion's object type (i.e Callout, Rich Text, etc)
+- [ ] Extract notion's object type (i.e Callout, Rich Text, etc)
 
 ## Support
 
