@@ -13,3 +13,11 @@ export const CHARACTER_ENTITIES_MAP = {
   copy: '©',
   reg: '®',
 };
+
+// TODO type
+export const SPACE: any = {
+  type: 'text',
+  text: {
+    content: ' ',
+  },
+};

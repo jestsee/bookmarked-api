@@ -1,6 +1,6 @@
 import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
-import { CHARACTER_ENTITIES_MAP } from './notion-sdk.constant';
+import { CHARACTER_ENTITIES_MAP, SPACE } from './notion-sdk.constant';
 
 export const constructRichText = ({ text, urls, media }: TweetData) => {
   const result = [];
@@ -64,15 +64,33 @@ export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
             bold: true,
           },
         },
+        SPACE,
         {
           type: 'text',
           text: {
-            content: ' @' + tweet.username,
+            content: '@' + tweet.username,
             link: { url: tweet.url },
           },
         },
+        constructText(' — '),
+        { mention: constructDate(tweet.date) },
       ],
       children,
+    },
+  };
+};
+
+const addHours = (date: Date, hours: number) => {
+  date.setTime(date.getTime() + hours * 60 * 60 * 1000);
+
+  return date;
+};
+
+const constructDate = (date: string) => {
+  return {
+    date: {
+      start: addHours(new Date(date), 7).toISOString(),
+      time_zone: 'Asia/Bangkok',
     },
   };
 };
