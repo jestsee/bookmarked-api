@@ -18,7 +18,9 @@ export class GetTweetDataDto {
 
   @IsString()
   @IsUrl(
-    { host_whitelist: ['twitter.com', 'x.com'] },
+    {
+      host_whitelist: ['twitter.com', 'x.com', 'www.twitter.com', 'www.x.com'],
+    },
     { message: 'URL must be a valid tweet URL' },
   )
   @IsNotEmpty()
