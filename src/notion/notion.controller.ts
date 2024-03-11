@@ -45,9 +45,11 @@ export class NotionController {
   ) {
     let { url } = dto;
     const PROTOCOLS = 'https://';
-    if (!url.includes(PROTOCOLS)) {
+
+    if (!url.includes(PROTOCOLS) && !url.includes('http://')) {
       url = PROTOCOLS + url;
     }
+
     const job = await this.notionQueue.add(NOTION_JOB, {
       ...dto,
       url,
