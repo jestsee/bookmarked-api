@@ -75,10 +75,17 @@ export class TwitterService {
   async getTwitterDataByNetworkHelper(payload: GetTweetDataPayload) {
     const { arrData, isThread, resolve, response, url } = payload;
     if (response.url().includes('graphql')) {
+      if (
+        !response.headers()['content-type'] ||
+        !response.headers()['content-type'].includes('application/json')
+      ) {
+        return resolve([]);
+      }
+
       const _response = await response.json();
 
       // Tweet not found
-      if (!_response.data.tweetResult.result) {
+      if (!_response?.data?.tweetResult?.result) {
         return resolve([]);
       }
 

@@ -4,6 +4,7 @@ export interface TweetData {
   name: string;
   username: string;
   avatar?: string;
+  date: string;
   text: string;
   url: string;
   quotedTweet?: TweetData;

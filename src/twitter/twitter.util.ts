@@ -5,7 +5,6 @@ export const extractTweetData = (
   url: string,
 ): TweetData => {
   const { result } = twitterResponse;
-  if (!result) return;
   const userData = result.core.user_results.result.legacy;
 
   const tweetContent = extractTweetContent(result);
@@ -14,6 +13,7 @@ export const extractTweetData = (
     name: userData.name,
     username: userData.screen_name,
     avatar: userData.profile_image_url_https,
+    date: result.legacy.created_at,
     url,
     ...tweetContent,
     ...(result.quoted_status_result && {

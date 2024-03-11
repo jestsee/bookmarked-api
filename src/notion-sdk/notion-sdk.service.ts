@@ -98,6 +98,11 @@ export class NotionSdkService {
         'Tweet Link': {
           url: tweet.url,
         },
+        'Tweet Date': {
+          date: {
+            start: new Date(tweet.date).toISOString(),
+          },
+        },
       },
     });
   }
