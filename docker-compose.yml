@@ -11,17 +11,14 @@ services:
       - '6379:6379'
   bookmarked-api:
     build: .
-    # platform: linux/amd64
-    volumes:
-      - .:/code
+    depends_on:
+      - redis
     ports:
       - '3001:3001'
     environment:
-      # - BROWSER_PATH=/usr/bin/google-chrome
       - BROWSER_PATH=/usr/bin/chromium
       - REDIS_PORT=6379
-      - REDIS_HOST=localhost
-      - REDIS_PASSWORD=
+      - REDIS_HOST=redis
       - NOTION_OAUTH_CLIENT_ID=e22033a6-3eb8-40d7-a5b5-501fd2a33c41
       - NOTION_OAUTH_CLIENT_SECRET=secret_hAnZ7PdghAGoCLZB9s04Y1MYSJI1dJ1TW1HSdYUJg4x
       - NOTION_REDIRECT_URI=https://api.notion.com/v1/oauth/authorize?client_id=e22033a6-3eb8-40d7-a5b5-501fd2a33c41&response_type=code&owner=user&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fredirect%2F
