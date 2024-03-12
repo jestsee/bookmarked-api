@@ -18,13 +18,20 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
+import { TwitterService } from 'src/twitter/twitter.service';
 
 @Controller('notion')
 export class NotionController {
   constructor(
     @InjectQueue(NOTION) private readonly notionQueue: Queue,
     private notionService: NotionService,
-  ) {}
+    private twitterService: TwitterService,
+  ) {
+    this.notionQueue.on('error', (err) => {
+      // Log your error.
+      console.log('error oi', err);
+    });
+  }
 
   @HttpCode(HttpStatusCode.Ok)
   @Post('generate-access-token')

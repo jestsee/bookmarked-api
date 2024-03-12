@@ -1,23 +1,27 @@
+# For Apple Silicone Device
 # Set the version of docker compose to use
 version: '3.9'
 
 # The containers that compose the project
 services:
-  dev-db:
-    image: postgres:15
+  redis:
+    image: redis:latest
     restart: always
     ports:
-      - '5434:5432'
-    environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: bookmark-dev
-  test-db:
-    image: postgres:15
-    restart: always
+      - '6379:6379'
+  bookmarked-api:
+    build: .
+    # platform: linux/amd64
+    volumes:
+      - .:/code
     ports:
-      - '5435:5432'
+      - '3001:3001'
     environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: bookmark-test
+      # - BROWSER_PATH=/usr/bin/google-chrome
+      - BROWSER_PATH=/usr/bin/chromium
+      - REDIS_PORT=6379
+      - REDIS_HOST=localhost
+      - REDIS_PASSWORD=
+      - NOTION_OAUTH_CLIENT_ID=e22033a6-3eb8-40d7-a5b5-501fd2a33c41
+      - NOTION_OAUTH_CLIENT_SECRET=secret_hAnZ7PdghAGoCLZB9s04Y1MYSJI1dJ1TW1HSdYUJg4x
+      - NOTION_REDIRECT_URI=https://api.notion.com/v1/oauth/authorize?client_id=e22033a6-3eb8-40d7-a5b5-501fd2a33c41&response_type=code&owner=user&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fredirect%2F
