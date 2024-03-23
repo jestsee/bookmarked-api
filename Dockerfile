@@ -33,3 +33,6 @@ EXPOSE 3001
 
 # Run app
 CMD ["pnpm", "start"]
+
+# Build command
+# docker build . -t ghcr.io/jestsee/bookmarked-api:latest && docker push ghcr.io/jestsee/bookmarked-api:latest

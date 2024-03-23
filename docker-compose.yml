@@ -1,23 +1,6 @@
-# Set the version of docker compose to use
-version: '3.9'
-
-# The containers that compose the project
 services:
-  dev-db:
-    image: postgres:15
-    restart: always
+  bookmarked-api:
+    container_name: bookmarked-api
+    image: ghrc.io/jestsee/bookmarked-api:latest
     ports:
-      - '5434:5432'
-    environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: bookmark-dev
-  test-db:
-    image: postgres:15
-    restart: always
-    ports:
-      - '5435:5432'
-    environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: bookmark-test
+      - 3001:3001
