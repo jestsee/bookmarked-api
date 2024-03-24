@@ -1,0 +1,26 @@
+# For Apple Silicone Device
+# Set the version of docker compose to use
+version: '3.9'
+
+# The containers that compose the project
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379'
+  bookmarked-api:
+    container_name: bookmarked-api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - redis
+    ports:
+      - '3001:3000'
+    env_file:
+      - .env.local
+    command: 'pnpm start:debug'
+    volumes:
+      - ./src:/app/src
