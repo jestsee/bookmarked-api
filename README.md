@@ -63,10 +63,16 @@ $ pnpm run start:prod
 
 ```
 {
-    "status": "failed",
-    "type": "thread",
-    "url": "https://twitter.com/meowtadi/status/1766781294334144976",
-    "message": "Navigating frame was detached"
+  "status": "failed",
+  "type": "thread",
+  "url": "https://twitter.com/meowtadi/status/1766781294334144976",
+  "message": "Navigating frame was detached"
+},
+{
+  "status": "failed",
+  "type": "thread",
+  "url": "https://twitter.com/warpdotdev/status/1767250494714466461",
+  "message": "Requesting main frame too early!"
 }
 ```
 

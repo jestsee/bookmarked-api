@@ -35,9 +35,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # ENV
-.env
-.env.local
-.env.test
+.env*
 
 .npmrc
 .nvmrc

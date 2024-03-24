@@ -1,24 +1,40 @@
-# For Apple Silicone Device
-# Set the version of docker compose to use
-version: '3.9'
-
-# The containers that compose the project
 services:
   redis:
     image: redis:latest
     restart: always
     ports:
-      - '6379:6379'
+      - 6379
+
   bookmarked-api:
-    build: .
+    container_name: bookmarked-api
+    image: ghcr.io/jestsee/bookmarked-api:latest
+    restart: always
+    ports:
+      - 3001
     depends_on:
       - redis
+    env_file:
+      - .env
+
+  nginx:
+    container_name: nginx
+    restart: unless-stopped
+    image: nginx
     ports:
-      - '3001:3001'
-    environment:
-      - BROWSER_PATH=/usr/bin/chromium
-      - REDIS_PORT=6379
-      - REDIS_HOST=redis
-      - NOTION_OAUTH_CLIENT_ID=e22033a6-3eb8-40d7-a5b5-501fd2a33c41
-      - NOTION_OAUTH_CLIENT_SECRET=secret_hAnZ7PdghAGoCLZB9s04Y1MYSJI1dJ1TW1HSdYUJg4x
-      - NOTION_REDIRECT_URI=https://api.notion.com/v1/oauth/authorize?client_id=e22033a6-3eb8-40d7-a5b5-501fd2a33c41&response_type=code&owner=user&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fredirect%2F
+      - 80:80
+      - 443:443
+    depends_on:
+      - bookmarked-api
+      - certbot
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email jestsee@gmail.com -d api.bookmarked.jestsee.com --agree-tos
