@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "docker:dev:up": "docker compose -f docker-compose.dev.yml up -d --build",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up -d --build",
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
     "docker:rm": "docker compose rm -s -f -v",
     "docker:build": "docker build -t jestsee/bookmarked .",

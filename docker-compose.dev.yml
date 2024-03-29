@@ -22,5 +22,6 @@ services:
     env_file:
       - .env.local
     command: 'pnpm start:debug'
+    restart: always
     volumes:
       - ./src:/app/src
