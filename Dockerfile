@@ -29,7 +29,7 @@ RUN pnpm install
 COPY . .
 
 # Expose app
-EXPOSE 3001
+EXPOSE 3000
 
 # Run app
 CMD ["pnpm", "start"]
