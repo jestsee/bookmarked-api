@@ -1,4 +1,4 @@
-import { HTTPResponse } from 'puppeteer';
+import { HTTPResponse, Page } from 'puppeteer';
 
 export interface TweetData {
   name: string;
@@ -32,6 +32,7 @@ export interface InlineMedia {
 export interface GetTweetDataPayload {
   response: HTTPResponse;
   resolve: (value: unknown) => void;
+  page: Page;
   url: string;
   arrData: TweetData[];
   isThread: boolean;

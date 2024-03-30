@@ -12,7 +12,7 @@ export class NotionConsumer {
     private twitterService: TwitterService,
   ) {}
 
-  @Process(NOTION_JOB)
+  @Process({ name: NOTION_JOB, concurrency: 4 })
   async bookmarkTweet(job: Job) {
     const tweets = await this.twitterService.getTwitterData(
       job.data.url,
