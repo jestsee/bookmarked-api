@@ -1,11 +1,10 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
 
 @Injectable()
 export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
-  private browser: Browser;
-  page: Page;
+  browser: Browser;
 
   constructor(private configService: ConfigService) {}
 
@@ -22,8 +21,6 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
         '--disable-features=site-per-process',
       ],
     });
-    this.page = await this.browser.newPage();
-    await this.page.setViewport({ width: 1080, height: 1024 });
   }
 
   async onModuleDestroy() {
@@ -31,12 +28,12 @@ export class PuppeteerService implements OnModuleInit, OnModuleDestroy {
     await this.browser.close();
   }
 
-  async resetPage() {
-    await this.page.close();
-    this.page = await this.browser.newPage();
-  }
+  // async resetPage() {
+  //   await this.page.close();
+  //   this.page = await this.browser.newPage();
+  // }
 
-  getElementTextContent(selector: string): Promise<string | null> {
-    return this.page.$eval(selector, (el) => el.textContent);
-  }
+  // getElementTextContent(selector: string): Promise<string | null> {
+  //   return this.page.$eval(selector, (el) => el.textContent);
+  // }
 }
