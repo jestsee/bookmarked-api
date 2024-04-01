@@ -32,4 +32,4 @@ COPY . .
 EXPOSE 3000
 
 # Run app
-CMD ["pnpm", "start"]
+CMD ["pnpm", "start:prod"]

@@ -11,6 +11,7 @@ export enum TwitterDataType {
   THREAD = 'thread',
 }
 
+// TODO move to notion folder and rename it as notion.dto.ts
 export class GetTweetDataDto {
   @IsString()
   @IsNotEmpty()

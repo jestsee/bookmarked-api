@@ -86,7 +86,7 @@ export class TwitterService {
 
       // Tweet not found
       if (!_response?.data?.tweetResult?.result) {
-        return resolve([]);
+        return resolve(arrData.reverse());
       }
 
       const parentTweet =
@@ -104,20 +104,24 @@ export class TwitterService {
         resolve(arrData.reverse());
       } else {
         // recursive function
-        const newUrl = this.generateNewUrl(url, parentTweet);
-        const newPage = await this.puppeteer.browser.newPage();
-        newPage.on(
-          'response',
-          (response) =>
-            response.request().method().toUpperCase() != 'OPTIONS' &&
-            this.getTwitterDataByNetworkHelper({
-              ...payload,
-              response,
-              page: newPage,
-              url: newUrl,
-            }),
-        );
-        await newPage.goto(newUrl);
+        try {
+          const newUrl = this.generateNewUrl(url, parentTweet);
+          const newPage = await this.puppeteer.browser.newPage();
+          newPage.on(
+            'response',
+            (response) =>
+              response.request().method().toUpperCase() != 'OPTIONS' &&
+              this.getTwitterDataByNetworkHelper({
+                ...payload,
+                response,
+                page: newPage,
+                url: newUrl,
+              }),
+          );
+          await newPage.goto(newUrl);
+        } catch (error) {
+          console.log('[ERROR]', error);
+        }
       }
     }
   }

@@ -1,12 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { NotionIntegrationDto } from './dto/notion-integration.dto';
 import { NotionSdkService } from 'src/notion-sdk/notion-sdk.service';
-import { TwitterDataType } from 'src/twitter/dto';
+import { GetTweetDataDto, TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';
+import { Queue } from 'bull';
+import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
+import { InjectQueue } from '@nestjs/bull';
 
 @Injectable()
 export class NotionService {
-  constructor(private readonly notionSdk: NotionSdkService) {}
+  constructor(
+    @InjectQueue(NOTION) private readonly notionQueue: Queue,
+    private readonly notionSdk: NotionSdkService,
+  ) {
+    this.notionQueue.on('error', (error) => {
+      console.log('[QUEUE ERROR]', error);
+    });
+  }
+
   // https://developers.notion.com/docs/authorization#prompt-for-a-standard-integration-with-no-template-option-default
   async getAccessToken({ code }: NotionIntegrationDto): Promise<{
     access_token: string;
@@ -40,5 +51,53 @@ export class NotionService {
     await this.notionSdk.createBlock(accessToken, page.id, tweets);
 
     return { message: 'Tweet successfully bookmarked' };
+  }
+
+  async bookmarkTweet(accessToken: string, payload: GetTweetDataDto) {
+    let { url } = payload;
+    const PROTOCOLS = 'https://';
+
+    if (!url.includes(PROTOCOLS) && !url.includes('http://')) {
+      url = PROTOCOLS + url;
+    }
+
+    const job = await this.notionQueue.add(NOTION_JOB, {
+      ...payload,
+      url,
+      accessToken,
+    });
+
+    return { id: job.id };
+  }
+
+  async checkProgress(taskId: string) {
+    const job = await this.notionQueue.getJob(taskId);
+
+    if (!job) throw new NotFoundException('Task not found');
+
+    const {
+      failedReason,
+      data: { type, url },
+    } = job;
+
+    const jobStatus = await job.getState();
+
+    const status = MAP_JOB_STATUS[jobStatus] ?? MAP_JOB_STATUS.default;
+    return {
+      status,
+      type,
+      url,
+      ...(failedReason && { message: failedReason }),
+    };
+  }
+
+  async retry(taskId: string) {
+    const job = await this.notionQueue.getJob(taskId);
+
+    if (!job) throw new NotFoundException('Task not found');
+
+    await job.retry();
+
+    return { message: 'In the process of retrying' };
   }
 }
