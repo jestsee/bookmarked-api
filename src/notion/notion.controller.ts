@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Sse,
   UseInterceptors,
 } from '@nestjs/common';
 import { NotionService } from './notion.service';
@@ -14,6 +15,7 @@ import { GetTweetDataDto } from 'src/twitter/dto';
 import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
+import { interval, map, Observable } from 'rxjs';
 
 @Controller('notion')
 export class NotionController {
@@ -32,7 +34,7 @@ export class NotionController {
   }
 
   @Post('bookmark-tweet')
-  async bookmarkTweet(
+  bookmarkTweet(
     @Headers('access-token') accessToken: string,
     @Body() dto: GetTweetDataDto,
   ) {
@@ -40,13 +42,18 @@ export class NotionController {
   }
 
   @Get('bookmark-tweet/:taskId/status')
-  async checkProgress(@Param('taskId') taskId: string) {
+  checkProgress(@Param('taskId') taskId: string) {
     return this.notionService.checkProgress(taskId);
+  }
+
+  @Sse('sse')
+  sse(): Observable<{ data: { hello: string } }> {
+    return interval(10).pipe(map((x) => ({ data: { hello: 'world' + x } })));
   }
 
   @Patch('bookmark-tweet/:taskId/retry')
   @UseInterceptors(RetryErrorInterceptor)
-  async retry(@Param('taskId') taskId: string) {
+  retry(@Param('taskId') taskId: string) {
     return this.notionService.retry(taskId);
   }
 }
