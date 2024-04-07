@@ -2,42 +2,42 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TweetData } from 'src/twitter/interface';
 import { BOOKMARK_EVENT } from './bookmark-notification.constant';
-import { fromEvent, map, takeWhile } from 'rxjs';
+import { filter, fromEvent, map, takeWhile } from 'rxjs';
 
 @Injectable()
 export class BookmarkNotificationService {
   constructor(private eventEmitter: EventEmitter2) {}
 
-  emitTweetScraped(data: TweetData, length: number) {
+  emitTweetScraped(data: TweetData, length: number, id: string) {
     const { name, username, url, text } = data;
     this.eventEmitter.emit(BOOKMARK_EVENT, {
-      data: { name, username, url, length, text },
+      data: { id, name, username, url, length, text },
     });
   }
 
-  emitAllTweetScraped() {
+  emitAllTweetScraped(id: string) {
     this.eventEmitter.emit(BOOKMARK_EVENT, {
-      data: { message: 'All tweets scraped' },
+      data: { id, message: 'All tweets scraped' },
     });
   }
 
-  emitSentToNotion() {
+  emitSentToNotion(id: string) {
     this.eventEmitter.emit(BOOKMARK_EVENT, {
-      data: { message: 'Tweets successfully sent to Notion' },
+      data: { id, message: 'Tweets successfully sent to Notion' },
     });
   }
 
-  emitCompleted() {
-    this.eventEmitter.emit(BOOKMARK_EVENT, { data: { isCompleted: true } });
+  emitCompleted(id: string) {
+    this.eventEmitter.emit(BOOKMARK_EVENT, { data: { id, isCompleted: true } });
   }
 
-  emitError(error: any) {
-    this.eventEmitter.emit(BOOKMARK_EVENT, { data: { error } });
+  emitError(error: any, id: string) {
+    this.eventEmitter.emit(BOOKMARK_EVENT, { data: { id, error } });
   }
 
-  subscribe() {
+  subscribe(id: string) {
     return fromEvent(this.eventEmitter, BOOKMARK_EVENT).pipe(
-      // combineLatest([interval(3000)]),
+      filter(({ data }) => data.id === id),
       takeWhile(({ data }) => !data.isCompleted),
       map(({ data }) => {
         // TODO implement catchError instead?

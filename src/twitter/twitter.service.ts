@@ -18,14 +18,17 @@ export class TwitterService {
     return newUrl;
   }
 
-  private async getTwitterDataByNetworkHelper(payload: GetTweetDataPayload) {
+  private async getTwitterDataByNetworkHelper(
+    payload: GetTweetDataPayload,
+    id: string,
+  ) {
     const { arrData, isThread, resolve, response, url, page } = payload;
     if (response.url().includes('graphql')) {
       if (
         !response.headers()['content-type'] ||
         !response.headers()['content-type'].includes('application/json')
       ) {
-        this.bookmarkNotification.emitCompleted();
+        this.bookmarkNotification.emitCompleted(id);
         return resolve([]);
       }
 
@@ -33,7 +36,7 @@ export class TwitterService {
 
       // Tweet not found
       if (!_response?.data?.tweetResult?.result) {
-        this.bookmarkNotification.emitCompleted();
+        this.bookmarkNotification.emitCompleted(id);
         return resolve(arrData.reverse());
       }
 
@@ -42,7 +45,7 @@ export class TwitterService {
       const data = extractTweetData(_response.data.tweetResult, url);
       arrData.push(data);
 
-      this.bookmarkNotification.emitTweetScraped(data, arrData.length);
+      this.bookmarkNotification.emitTweetScraped(data, arrData.length, id);
       console.log({ data, length: arrData.length });
 
       page.removeAllListeners();
@@ -50,7 +53,7 @@ export class TwitterService {
 
       // stop condition
       if (!isThread || !parentTweet) {
-        this.bookmarkNotification.emitAllTweetScraped();
+        this.bookmarkNotification.emitAllTweetScraped(id);
         return resolve(arrData.reverse());
       } else {
         // recursive function
@@ -61,16 +64,19 @@ export class TwitterService {
             'response',
             (response) =>
               response.request().method().toUpperCase() != 'OPTIONS' &&
-              this.getTwitterDataByNetworkHelper({
-                ...payload,
-                response,
-                page: newPage,
-                url: newUrl,
-              }),
+              this.getTwitterDataByNetworkHelper(
+                {
+                  ...payload,
+                  response,
+                  page: newPage,
+                  url: newUrl,
+                },
+                id,
+              ),
           );
           await newPage.goto(newUrl);
         } catch (error) {
-          this.bookmarkNotification.emitError(error);
+          this.bookmarkNotification.emitError(error, id);
           console.log('[ERROR]', error);
         }
       }
@@ -80,6 +86,7 @@ export class TwitterService {
   private async getTwitterDataByNetwork(
     url: string,
     isThread: boolean,
+    id: string,
   ): Promise<TweetData[]> {
     const arrData: TweetData[] = [];
     const page = await this.puppeteer.browser.newPage();
@@ -88,14 +95,17 @@ export class TwitterService {
         'response',
         (response) =>
           response.request().method().toUpperCase() != 'OPTIONS' &&
-          this.getTwitterDataByNetworkHelper({
-            response,
-            resolve,
-            page,
-            url,
-            arrData,
-            isThread,
-          }),
+          this.getTwitterDataByNetworkHelper(
+            {
+              response,
+              resolve,
+              page,
+              url,
+              arrData,
+              isThread,
+            },
+            id,
+          ),
       );
     });
 
@@ -104,7 +114,8 @@ export class TwitterService {
     return result;
   }
 
-  getTwitterData(url: string, type: TwitterDataType) {
-    return this.getTwitterDataByNetwork(url, type === TwitterDataType.THREAD);
+  getTwitterData(url: string, type: TwitterDataType, id: string) {
+    const isThread = type === TwitterDataType.THREAD;
+    return this.getTwitterDataByNetwork(url, isThread, id);
   }
 }

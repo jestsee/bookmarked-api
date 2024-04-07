@@ -51,8 +51,8 @@ export class NotionController {
   }
 
   @Sse('bookmark-tweet/:taskId/status/sse')
-  checkProgressWithSse() {
-    return this.bookmarkNotificationService.subscribe();
+  checkProgressWithSse(@Param('taskId') taskId: string) {
+    return this.bookmarkNotificationService.subscribe(taskId);
   }
 
   @Sse('sse')

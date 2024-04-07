@@ -7,6 +7,7 @@ import { Queue } from 'bull';
 import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { InjectQueue } from '@nestjs/bull';
 import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class NotionService {
@@ -40,6 +41,7 @@ export class NotionService {
     databaseId: string,
     tweets: TweetData[],
     tag: string[] = [],
+    id: string,
   ) {
     const firstTweet = tweets.at(0);
     const page = await this.notionSdk.createPage(
@@ -50,9 +52,9 @@ export class NotionService {
       tag,
     );
 
-    await this.notionSdk.createBlock(accessToken, page.id, tweets);
-    this.bookmarkNotification.emitSentToNotion();
-    this.bookmarkNotification.emitCompleted();
+    await this.notionSdk.createBlock(accessToken, page.id, tweets); // TODO wrap with try-catch and emit the error event in catch scope
+    this.bookmarkNotification.emitSentToNotion(id);
+    this.bookmarkNotification.emitCompleted(id);
 
     return { message: 'Tweet successfully bookmarked' };
   }
@@ -65,11 +67,18 @@ export class NotionService {
       url = PROTOCOLS + url;
     }
 
-    const job = await this.notionQueue.add(NOTION_JOB, {
-      ...payload,
-      url,
-      accessToken,
-    });
+    const id = uuidv4();
+
+    const job = await this.notionQueue.add(
+      NOTION_JOB,
+      {
+        ...payload,
+        url,
+        accessToken,
+        id,
+      },
+      { jobId: id },
+    );
 
     return { id: job.id };
   }
