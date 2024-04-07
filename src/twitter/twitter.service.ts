@@ -50,8 +50,8 @@ export class TwitterService {
 
       // stop condition
       if (!isThread || !parentTweet) {
-        this.bookmarkNotification.emitCompleted();
-        resolve(arrData.reverse());
+        this.bookmarkNotification.emitAllTweetScraped();
+        return resolve(arrData.reverse());
       } else {
         // recursive function
         try {

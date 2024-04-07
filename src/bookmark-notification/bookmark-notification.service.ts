@@ -15,11 +15,23 @@ export class BookmarkNotificationService {
     });
   }
 
+  emitAllTweetScraped() {
+    this.eventEmitter.emit(BOOKMARK_EVENT, {
+      data: { message: 'All tweets scraped' },
+    });
+  }
+
+  emitSentToNotion() {
+    this.eventEmitter.emit(BOOKMARK_EVENT, {
+      data: { message: 'Tweets successfully sent to Notion' },
+    });
+  }
+
   emitCompleted() {
     this.eventEmitter.emit(BOOKMARK_EVENT, { data: { isCompleted: true } });
   }
 
-  emitError(error) {
+  emitError(error: any) {
     this.eventEmitter.emit(BOOKMARK_EVENT, { data: { error } });
   }
 

@@ -6,12 +6,14 @@ import { TweetData } from 'src/twitter/interface';
 import { Queue } from 'bull';
 import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { InjectQueue } from '@nestjs/bull';
+import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
 
 @Injectable()
 export class NotionService {
   constructor(
     @InjectQueue(NOTION) private readonly notionQueue: Queue,
     private readonly notionSdk: NotionSdkService,
+    private bookmarkNotification: BookmarkNotificationService,
   ) {
     this.notionQueue.on('error', (error) => {
       console.log('[QUEUE ERROR]', error);
@@ -49,6 +51,8 @@ export class NotionService {
     );
 
     await this.notionSdk.createBlock(accessToken, page.id, tweets);
+    this.bookmarkNotification.emitSentToNotion();
+    this.bookmarkNotification.emitCompleted();
 
     return { message: 'Tweet successfully bookmarked' };
   }
