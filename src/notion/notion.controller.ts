@@ -16,13 +16,13 @@ import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
 import { Observable } from 'rxjs';
-import { TwitterService } from 'src/twitter/twitter.service';
+import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
 
 @Controller('notion')
 export class NotionController {
   constructor(
     private notionService: NotionService,
-    private twitterService: TwitterService,
+    private bookmarkNotificationService: BookmarkNotificationService,
   ) {}
 
   @HttpCode(HttpStatusCode.Ok)
@@ -52,7 +52,7 @@ export class NotionController {
 
   @Sse('bookmark-tweet/:taskId/status/sse')
   checkProgressWithSse() {
-    return this.twitterService.subscribeBookmarkProgress();
+    return this.bookmarkNotificationService.subscribe();
   }
 
   @Sse('sse')

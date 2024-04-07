@@ -1,37 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
 import { GetTweetDataPayload, TweetData } from './interface';
 import { TwitterDataType } from './dto';
 import { extractTweetData } from './twitter.util';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { fromEvent, map, takeWhile } from 'rxjs';
+import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
 
 @Injectable()
 export class TwitterService {
   constructor(
     private puppeteer: PuppeteerService,
-    private eventEmitter: EventEmitter2,
+    private bookmarkNotification: BookmarkNotificationService,
   ) {}
 
   private generateNewUrl(url: string, code: string) {
     const lastSlashIndex = url.lastIndexOf('/');
     const newUrl = url.substring(0, lastSlashIndex + 1) + code;
     return newUrl;
-  }
-
-  private emitTweetEvent(data: TweetData, length: number) {
-    const { name, username, url, text } = data;
-    this.eventEmitter.emit('tweet.scraped', {
-      data: { name, username, url, length, text },
-    });
-  }
-
-  private emitTweetCompletion() {
-    this.eventEmitter.emit('tweet.scraped', { data: { isCompleted: true } });
-  }
-
-  private emitTweetError(error) {
-    this.eventEmitter.emit('tweet.scraped', { data: { error } });
   }
 
   private async getTwitterDataByNetworkHelper(payload: GetTweetDataPayload) {
@@ -41,7 +25,7 @@ export class TwitterService {
         !response.headers()['content-type'] ||
         !response.headers()['content-type'].includes('application/json')
       ) {
-        this.emitTweetCompletion();
+        this.bookmarkNotification.emitCompleted();
         return resolve([]);
       }
 
@@ -49,7 +33,7 @@ export class TwitterService {
 
       // Tweet not found
       if (!_response?.data?.tweetResult?.result) {
-        this.emitTweetCompletion();
+        this.bookmarkNotification.emitCompleted();
         return resolve(arrData.reverse());
       }
 
@@ -58,7 +42,7 @@ export class TwitterService {
       const data = extractTweetData(_response.data.tweetResult, url);
       arrData.push(data);
 
-      this.emitTweetEvent(data, arrData.length);
+      this.bookmarkNotification.emitTweetScraped(data, arrData.length);
       console.log({ data, length: arrData.length });
 
       page.removeAllListeners();
@@ -66,7 +50,7 @@ export class TwitterService {
 
       // stop condition
       if (!isThread || !parentTweet) {
-        this.emitTweetCompletion();
+        this.bookmarkNotification.emitCompleted();
         resolve(arrData.reverse());
       } else {
         // recursive function
@@ -86,7 +70,7 @@ export class TwitterService {
           );
           await newPage.goto(newUrl);
         } catch (error) {
-          this.emitTweetError(error);
+          this.bookmarkNotification.emitError(error);
           console.log('[ERROR]', error);
         }
       }
@@ -122,17 +106,5 @@ export class TwitterService {
 
   getTwitterData(url: string, type: TwitterDataType) {
     return this.getTwitterDataByNetwork(url, type === TwitterDataType.THREAD);
-  }
-
-  subscribeBookmarkProgress() {
-    return fromEvent(this.eventEmitter, 'tweet.scraped').pipe(
-      // combineLatest([interval(3000)]),
-      takeWhile(({ data }) => !data.isCompleted),
-      map(({ data }) => {
-        // TODO implement catchError instead?
-        if (data.error) throw new BadRequestException(data.error);
-        return { data };
-      }),
-    );
   }
 }

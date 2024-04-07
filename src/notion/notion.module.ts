@@ -11,10 +11,15 @@ import { TwitterModule } from 'src/twitter/twitter.module';
 import { NotionAccessTokenMiddleware } from 'src/middleware/notion-access-token.middleware';
 import { BullModule } from '@nestjs/bull';
 import { NotionConsumer } from './notion.consumer';
+import { BookmarkNotificationModule } from 'src/bookmark-notification/bookmark-notification.module';
 
 @Global()
 @Module({
-  imports: [BullModule.registerQueueAsync({ name: 'notion' }), TwitterModule],
+  imports: [
+    BullModule.registerQueueAsync({ name: 'notion' }),
+    TwitterModule,
+    BookmarkNotificationModule,
+  ],
   providers: [NotionService, NotionConsumer],
   exports: [NotionService],
   controllers: [NotionController],

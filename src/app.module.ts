@@ -8,6 +8,7 @@ import { PuppeteerModule } from './puppeteer/puppeteer.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { BullModule } from '@nestjs/bull';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BookmarkNotificationModule } from './bookmark-notification/bookmark-notification.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     NotionSdkModule,
     PuppeteerModule,
     TwitterModule,
+    BookmarkNotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
