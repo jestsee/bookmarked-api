@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { NotionIntegrationDto } from './dto/notion-integration.dto';
 import { NotionSdkService } from 'src/notion-sdk/notion-sdk.service';
 import { GetTweetDataDto, TwitterDataType } from 'src/twitter/dto';
@@ -95,6 +99,12 @@ export class NotionService {
     const job = await this.notionQueue.getJob(taskId);
 
     if (!job) throw new NotFoundException('Task not found');
+
+    if (job.isActive)
+      throw new BadRequestException('Currently in the process of bookmarking');
+
+    if (job.isCompleted)
+      throw new BadRequestException('This bookmark process already completed');
 
     await job.retry();
 

@@ -7,12 +7,10 @@ import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
 import { PuppeteerModule } from './puppeteer/puppeteer.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { BullModule } from '@nestjs/bull';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -29,6 +27,10 @@ import { BullModule } from '@nestjs/bull';
         },
       }),
     }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    EventEmitterModule.forRoot(),
     NotionModule,
     NotionSdkModule,
     PuppeteerModule,

@@ -15,11 +15,15 @@ import { GetTweetDataDto } from 'src/twitter/dto';
 import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
-import { interval, map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { TwitterService } from 'src/twitter/twitter.service';
 
 @Controller('notion')
 export class NotionController {
-  constructor(private notionService: NotionService) {}
+  constructor(
+    private notionService: NotionService,
+    private twitterService: TwitterService,
+  ) {}
 
   @HttpCode(HttpStatusCode.Ok)
   @Post('generate-access-token')
@@ -46,9 +50,20 @@ export class NotionController {
     return this.notionService.checkProgress(taskId);
   }
 
+  @Sse('bookmark-tweet/:taskId/status/sse')
+  checkProgressWithSse() {
+    return this.twitterService.subscribeBookmarkProgress();
+  }
+
   @Sse('sse')
   sse(): Observable<{ data: { hello: string } }> {
-    return interval(10).pipe(map((x) => ({ data: { hello: 'world' + x } })));
+    return new Observable((observer) => {
+      observer.next({ data: { hello: 'hah' } });
+      observer.next({ data: { hello: 'heh' } });
+      observer.next({ data: { hello: 'hoh' } });
+      observer.error({ message: 'something went wrong' });
+      observer.complete();
+    });
   }
 
   @Patch('bookmark-tweet/:taskId/retry')

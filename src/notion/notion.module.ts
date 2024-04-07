@@ -33,6 +33,10 @@ export class NotionModule implements NestModule {
           method: RequestMethod.GET,
         },
         {
+          path: 'notion/bookmark-tweet/:taskId/status/sse',
+          method: RequestMethod.GET,
+        },
+        {
           path: 'notion/bookmark-tweet/:taskId/retry',
           method: RequestMethod.PATCH,
         },
