@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
 import { GetTweetDataPayload, TweetData } from './interface';
 import { TwitterDataType } from './dto';
@@ -78,6 +78,7 @@ export class TwitterService {
         } catch (error) {
           this.bookmarkNotification.emitError(error, id);
           console.log('[ERROR]', error);
+          throw new InternalServerErrorException(error);
         }
       }
     }

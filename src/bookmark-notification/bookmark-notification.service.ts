@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TweetData } from 'src/twitter/interface';
 import { BOOKMARK_EVENT } from './bookmark-notification.constant';
-import { filter, fromEvent, map, takeWhile } from 'rxjs';
+import { filter, fromEvent, map, takeWhile, throwError, timeout } from 'rxjs';
 
 @Injectable()
 export class BookmarkNotificationService {
@@ -43,6 +43,11 @@ export class BookmarkNotificationService {
         // TODO implement catchError instead?
         if (data.error) throw new BadRequestException(data.error);
         return { data };
+      }),
+      timeout({
+        each: 5000,
+        with: () =>
+          throwError(() => new BadRequestException('Connection timed out')),
       }),
     );
   }

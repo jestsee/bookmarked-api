@@ -15,11 +15,7 @@ export class NotionService {
     @InjectQueue(NOTION) private readonly notionQueue: Queue,
     private readonly notionSdk: NotionSdkService,
     private bookmarkNotification: BookmarkNotificationService,
-  ) {
-    this.notionQueue.on('error', (error) => {
-      console.log('[QUEUE ERROR]', error);
-    });
-  }
+  ) {}
 
   // https://developers.notion.com/docs/authorization#prompt-for-a-standard-integration-with-no-template-option-default
   async getAccessToken({ code }: NotionIntegrationDto): Promise<{
@@ -83,6 +79,16 @@ export class NotionService {
     return { id: job.id };
   }
 
+  async checkProgressWithSSE(taskId: string) {
+    const job = await this.notionQueue.getJob(taskId);
+
+    if (!job) {
+      throw new NotFoundException('Task not found');
+    }
+
+    return this.bookmarkNotification.subscribe(taskId);
+  }
+
   async checkProgress(taskId: string) {
     const job = await this.notionQueue.getJob(taskId);
 
@@ -111,6 +117,6 @@ export class NotionService {
 
     await job.retry();
 
-    return { message: 'In the process of retrying' };
+    return { message: 'Making another attempt' };
   }
 }
