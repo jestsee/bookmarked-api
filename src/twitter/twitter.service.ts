@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
 import { GetTweetDataPayload, TweetData } from './interface';
 import { TwitterDataType } from './dto';
@@ -78,7 +78,7 @@ export class TwitterService {
         } catch (error) {
           this.bookmarkNotification.emitError(error, id);
           console.log('[ERROR]', error);
-          throw new InternalServerErrorException(error);
+          return resolve(arrData.reverse());
         }
       }
     }
@@ -111,8 +111,7 @@ export class TwitterService {
     });
 
     await page.goto(url);
-    const result = await resultPromise; // Wait for the Promise to be resolved
-    return result;
+    return resultPromise;
   }
 
   getTwitterData(url: string, type: TwitterDataType, id: string) {

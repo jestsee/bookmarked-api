@@ -48,11 +48,10 @@ export class NotionService {
       tag,
     );
 
-    await this.notionSdk.createBlock(accessToken, page.id, tweets); // TODO wrap with try-catch and emit the error event in catch scope
-    this.bookmarkNotification.emitSentToNotion(id);
-    this.bookmarkNotification.emitCompleted(id);
+    await this.notionSdk.createBlock(accessToken, page.id, tweets);
 
-    return { message: 'Tweet successfully bookmarked' };
+    this.bookmarkNotification.emitSentToNotion(id, page.url);
+    this.bookmarkNotification.emitCompleted(id);
   }
 
   async bookmarkTweet(accessToken: string, payload: GetTweetDataDto) {
