@@ -4,6 +4,7 @@ import { TwitterService } from 'src/twitter/twitter.service';
 import { NotionService } from './notion.service';
 import { NOTION, NOTION_JOB } from './notion.constant';
 import { BadRequestException } from '@nestjs/common';
+import { NotionJobPayload } from './interface';
 
 @Processor(NOTION)
 export class NotionConsumer {
@@ -13,21 +14,20 @@ export class NotionConsumer {
   ) {}
 
   @Process({ name: NOTION_JOB, concurrency: 4 })
-  async bookmarkTweet(job: Job) {
-    const tweets = await this.twitterService.getTwitterData(
-      job.data.url,
-      job.data.type,
-    );
+  async bookmarkTweet(job: Job<NotionJobPayload>) {
+    const { accessToken, databaseId, tags, type, url, id } = job.data;
+    const tweets = await this.twitterService.getTwitterData(url, type, id);
 
     if (!tweets || tweets.length === 0) {
       throw new BadRequestException('Tweet not found');
     }
 
     return this.notionService.createPage(
-      job.data.accessToken,
-      job.data.databaseId,
+      accessToken,
+      databaseId,
       tweets,
-      job.data.tags,
+      tags,
+      id,
     );
   }
 }

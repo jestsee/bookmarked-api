@@ -1,3 +1,5 @@
+import { GetTweetDataDto } from 'src/twitter/dto';
+
 export interface INotionAccessToken {
   data: {
     access_token: string;
@@ -8,4 +10,9 @@ export interface INotionAccessToken {
     workspace_id: string;
     duplicate_template_id?: string;
   };
+}
+
+export interface NotionJobPayload extends GetTweetDataDto {
+  id: string;
+  accessToken: string;
 }

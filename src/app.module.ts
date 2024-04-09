@@ -7,12 +7,11 @@ import { NotionSdkModule } from './notion-sdk/notion-sdk.module';
 import { PuppeteerModule } from './puppeteer/puppeteer.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { BullModule } from '@nestjs/bull';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BookmarkNotificationModule } from './bookmark-notification/bookmark-notification.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -29,10 +28,15 @@ import { BullModule } from '@nestjs/bull';
         },
       }),
     }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    EventEmitterModule.forRoot(),
     NotionModule,
     NotionSdkModule,
     PuppeteerModule,
     TwitterModule,
+    BookmarkNotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,34 +4,21 @@ import {
   Get,
   Headers,
   HttpCode,
-  NotFoundException,
   Param,
   Patch,
   Post,
+  Sse,
   UseInterceptors,
 } from '@nestjs/common';
 import { NotionService } from './notion.service';
 import { GetTweetDataDto } from 'src/twitter/dto';
 import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
-import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
-import { TwitterService } from 'src/twitter/twitter.service';
 
 @Controller('notion')
 export class NotionController {
-  constructor(
-    @InjectQueue(NOTION) private readonly notionQueue: Queue,
-    private notionService: NotionService,
-    private twitterService: TwitterService,
-  ) {
-    this.notionQueue.on('error', (err) => {
-      // Log your error.
-      console.log('error oi', err);
-    });
-  }
+  constructor(private notionService: NotionService) {}
 
   @HttpCode(HttpStatusCode.Ok)
   @Post('generate-access-token')
@@ -39,63 +26,33 @@ export class NotionController {
     return this.notionService.getAccessToken(dto);
   }
 
-  // fetch first database
+  // fetch first database only
   @Get('database')
   getDatabases(@Headers('access-token') accessToken: string) {
     return this.notionService.getDatabase(accessToken);
   }
 
   @Post('bookmark-tweet')
-  async bookmarkTweet(
+  bookmarkTweet(
     @Headers('access-token') accessToken: string,
     @Body() dto: GetTweetDataDto,
   ) {
-    let { url } = dto;
-    const PROTOCOLS = 'https://';
-
-    if (!url.includes(PROTOCOLS) && !url.includes('http://')) {
-      url = PROTOCOLS + url;
-    }
-
-    const job = await this.notionQueue.add(NOTION_JOB, {
-      ...dto,
-      url,
-      accessToken,
-    });
-    return { id: job.id };
+    return this.notionService.bookmarkTweet(accessToken, dto);
   }
 
   @Get('bookmark-tweet/:taskId/status')
-  async checkProgress(@Param('taskId') taskId: string) {
-    const job = await this.notionQueue.getJob(taskId);
+  checkProgress(@Param('taskId') taskId: string) {
+    return this.notionService.checkProgress(taskId);
+  }
 
-    if (!job) throw new NotFoundException('Task not found');
-
-    const {
-      failedReason,
-      data: { type, url },
-    } = job;
-
-    const jobStatus = await job.getState();
-
-    const status = MAP_JOB_STATUS[jobStatus] ?? MAP_JOB_STATUS.default;
-    return {
-      status,
-      type,
-      url,
-      ...(failedReason && { message: failedReason }),
-    };
+  @Sse('bookmark-tweet/:taskId/status/sse')
+  checkProgressWithSse(@Param('taskId') taskId: string) {
+    return this.notionService.checkProgressWithSSE(taskId);
   }
 
   @Patch('bookmark-tweet/:taskId/retry')
   @UseInterceptors(RetryErrorInterceptor)
-  async tryAgain(@Param('taskId') taskId: string) {
-    const job = await this.notionQueue.getJob(taskId);
-
-    if (!job) throw new NotFoundException('Task not found');
-
-    await job.retry();
-
-    return { message: 'In the process of retrying' };
+  retry(@Param('taskId') taskId: string) {
+    return this.notionService.retry(taskId);
   }
 }
