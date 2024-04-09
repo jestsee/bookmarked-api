@@ -6,17 +6,16 @@ import { TweetData } from 'src/twitter/interface';
 import { Queue } from 'bull';
 import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { InjectQueue } from '@nestjs/bull';
+import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class NotionService {
   constructor(
     @InjectQueue(NOTION) private readonly notionQueue: Queue,
     private readonly notionSdk: NotionSdkService,
-  ) {
-    this.notionQueue.on('error', (error) => {
-      console.log('[QUEUE ERROR]', error);
-    });
-  }
+    private bookmarkNotification: BookmarkNotificationService,
+  ) {}
 
   // https://developers.notion.com/docs/authorization#prompt-for-a-standard-integration-with-no-template-option-default
   async getAccessToken({ code }: NotionIntegrationDto): Promise<{
@@ -38,6 +37,7 @@ export class NotionService {
     databaseId: string,
     tweets: TweetData[],
     tag: string[] = [],
+    id: string,
   ) {
     const firstTweet = tweets.at(0);
     const page = await this.notionSdk.createPage(
@@ -50,7 +50,8 @@ export class NotionService {
 
     await this.notionSdk.createBlock(accessToken, page.id, tweets);
 
-    return { message: 'Tweet successfully bookmarked' };
+    this.bookmarkNotification.emitSentToNotion(id, page.url);
+    this.bookmarkNotification.emitCompleted(id);
   }
 
   async bookmarkTweet(accessToken: string, payload: GetTweetDataDto) {
@@ -61,13 +62,30 @@ export class NotionService {
       url = PROTOCOLS + url;
     }
 
-    const job = await this.notionQueue.add(NOTION_JOB, {
-      ...payload,
-      url,
-      accessToken,
-    });
+    const id = uuidv4();
+
+    const job = await this.notionQueue.add(
+      NOTION_JOB,
+      {
+        ...payload,
+        url,
+        accessToken,
+        id,
+      },
+      { jobId: id },
+    );
 
     return { id: job.id };
+  }
+
+  async checkProgressWithSSE(taskId: string) {
+    const job = await this.notionQueue.getJob(taskId);
+
+    if (!job) {
+      throw new NotFoundException('Task not found');
+    }
+
+    return this.bookmarkNotification.subscribe(taskId);
   }
 
   async checkProgress(taskId: string) {
@@ -98,6 +116,6 @@ export class NotionService {
 
     await job.retry();
 
-    return { message: 'In the process of retrying' };
+    return { message: 'Making another attempt' };
   }
 }

@@ -10,6 +10,7 @@ import {
   constructRichText,
   trimTitleText,
 } from './notion-sdk.util';
+import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 @Injectable()
 export class NotionSdkService {
@@ -64,7 +65,7 @@ export class NotionSdkService {
     tweet: TweetData,
     type: TwitterDataType,
     tags: string[],
-  ) {
+  ): Promise<PageObjectResponse> {
     return this.client.pages.create({
       auth: accessToken,
       parent: { database_id: databaseId },
@@ -104,7 +105,7 @@ export class NotionSdkService {
           },
         },
       },
-    });
+    }) as Promise<PageObjectResponse>;
   }
 
   createBlock(accessToken: string, blockId: string, tweets: TweetData[]) {

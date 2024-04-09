@@ -15,7 +15,6 @@ import { GetTweetDataDto } from 'src/twitter/dto';
 import { NotionIntegrationDto } from './dto';
 import { HttpStatusCode } from 'axios';
 import { RetryErrorInterceptor } from 'src/interceptor/retry-error.interceptor';
-import { interval, map, Observable } from 'rxjs';
 
 @Controller('notion')
 export class NotionController {
@@ -46,9 +45,9 @@ export class NotionController {
     return this.notionService.checkProgress(taskId);
   }
 
-  @Sse('sse')
-  sse(): Observable<{ data: { hello: string } }> {
-    return interval(10).pipe(map((x) => ({ data: { hello: 'world' + x } })));
+  @Sse('bookmark-tweet/:taskId/status/sse')
+  checkProgressWithSse(@Param('taskId') taskId: string) {
+    return this.notionService.checkProgressWithSSE(taskId);
   }
 
   @Patch('bookmark-tweet/:taskId/retry')

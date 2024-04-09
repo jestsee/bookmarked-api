@@ -3,24 +3,32 @@ import { PuppeteerService } from 'src/puppeteer/puppeteer.service';
 import { GetTweetDataPayload, TweetData } from './interface';
 import { TwitterDataType } from './dto';
 import { extractTweetData } from './twitter.util';
+import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
 
 @Injectable()
 export class TwitterService {
-  constructor(private puppeteer: PuppeteerService) {}
+  constructor(
+    private puppeteer: PuppeteerService,
+    private bookmarkNotification: BookmarkNotificationService,
+  ) {}
 
-  generateNewUrl(url: string, code: string) {
+  private generateNewUrl(url: string, code: string) {
     const lastSlashIndex = url.lastIndexOf('/');
     const newUrl = url.substring(0, lastSlashIndex + 1) + code;
     return newUrl;
   }
 
-  async getTwitterDataByNetworkHelper(payload: GetTweetDataPayload) {
+  private async getTwitterDataByNetworkHelper(
+    payload: GetTweetDataPayload,
+    id: string,
+  ) {
     const { arrData, isThread, resolve, response, url, page } = payload;
     if (response.url().includes('graphql')) {
       if (
         !response.headers()['content-type'] ||
         !response.headers()['content-type'].includes('application/json')
       ) {
+        this.bookmarkNotification.emitCompleted(id);
         return resolve([]);
       }
 
@@ -28,22 +36,25 @@ export class TwitterService {
 
       // Tweet not found
       if (!_response?.data?.tweetResult?.result) {
+        this.bookmarkNotification.emitCompleted(id);
         return resolve(arrData.reverse());
       }
 
       const parentTweet =
         _response.data.tweetResult.result.legacy.in_reply_to_status_id_str;
       const data = extractTweetData(_response.data.tweetResult, url);
-
-      console.log({ data, length: arrData.length });
       arrData.push(data);
+
+      this.bookmarkNotification.emitTweetScraped(data, arrData.length, id);
+      console.log({ data, length: arrData.length });
 
       page.removeAllListeners();
       await page.close();
 
       // stop condition
       if (!isThread || !parentTweet) {
-        resolve(arrData.reverse());
+        this.bookmarkNotification.emitAllTweetScraped(id);
+        return resolve(arrData.reverse());
       } else {
         // recursive function
         try {
@@ -53,24 +64,30 @@ export class TwitterService {
             'response',
             (response) =>
               response.request().method().toUpperCase() != 'OPTIONS' &&
-              this.getTwitterDataByNetworkHelper({
-                ...payload,
-                response,
-                page: newPage,
-                url: newUrl,
-              }),
+              this.getTwitterDataByNetworkHelper(
+                {
+                  ...payload,
+                  response,
+                  page: newPage,
+                  url: newUrl,
+                },
+                id,
+              ),
           );
           await newPage.goto(newUrl);
         } catch (error) {
+          this.bookmarkNotification.emitError(error, id);
           console.log('[ERROR]', error);
+          return resolve(arrData.reverse());
         }
       }
     }
   }
 
-  async getTwitterDataByNetwork(
+  private async getTwitterDataByNetwork(
     url: string,
     isThread: boolean,
+    id: string,
   ): Promise<TweetData[]> {
     const arrData: TweetData[] = [];
     const page = await this.puppeteer.browser.newPage();
@@ -79,23 +96,26 @@ export class TwitterService {
         'response',
         (response) =>
           response.request().method().toUpperCase() != 'OPTIONS' &&
-          this.getTwitterDataByNetworkHelper({
-            response,
-            resolve,
-            page,
-            url,
-            arrData,
-            isThread,
-          }),
+          this.getTwitterDataByNetworkHelper(
+            {
+              response,
+              resolve,
+              page,
+              url,
+              arrData,
+              isThread,
+            },
+            id,
+          ),
       );
     });
 
     await page.goto(url);
-    const result = await resultPromise; // Wait for the Promise to be resolved
-    return result;
+    return resultPromise;
   }
 
-  async getTwitterData(url: string, type: TwitterDataType) {
-    return this.getTwitterDataByNetwork(url, type === TwitterDataType.THREAD);
+  getTwitterData(url: string, type: TwitterDataType, id: string) {
+    const isThread = type === TwitterDataType.THREAD;
+    return this.getTwitterDataByNetwork(url, isThread, id);
   }
 }
