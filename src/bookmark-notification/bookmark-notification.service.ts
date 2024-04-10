@@ -50,7 +50,7 @@ export class BookmarkNotificationService {
         return { data };
       }),
       timeout({
-        each: 8000,
+        each: 15000,
         with: () =>
           throwError(() => new BadRequestException('Connection timed out')),
       }),

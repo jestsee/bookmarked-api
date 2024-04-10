@@ -18,6 +18,7 @@ export class TwitterService {
     return newUrl;
   }
 
+  // avoid to use early return when the process likely still continue
   private async getTwitterDataByNetworkHelper(
     payload: GetTweetDataPayload,
     id: string,
@@ -54,7 +55,7 @@ export class TwitterService {
       // stop condition
       if (!isThread || !parentTweet) {
         this.bookmarkNotification.emitAllTweetScraped(id);
-        return resolve(arrData.reverse());
+        resolve(arrData.reverse());
       } else {
         // recursive function
         try {
@@ -76,9 +77,14 @@ export class TwitterService {
           );
           await newPage.goto(newUrl);
         } catch (error) {
-          this.bookmarkNotification.emitError(error, id);
-          console.log('[ERROR]', error);
-          return resolve(arrData.reverse());
+          if (error.message.includes('Navigating frame was detached')) {
+            console.error('Frame detached!! Skipping interaction.');
+          } else {
+            this.bookmarkNotification.emitError(error, id);
+            console.log('[ERROR]', error);
+            resolve(arrData.reverse());
+            throw error;
+          }
         }
       }
     }
@@ -111,7 +117,8 @@ export class TwitterService {
     });
 
     await page.goto(url);
-    return resultPromise;
+    const result = await resultPromise; // Wait for the Promise to be resolved
+    return result;
   }
 
   getTwitterData(url: string, type: TwitterDataType, id: string) {
