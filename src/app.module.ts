@@ -16,7 +16,7 @@ import { BookmarkNotificationModule } from './bookmark-notification/bookmark-not
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        redis: {
+        redis: configService.get<string>('REDIS_URL') || {
           host: configService.get<string>('REDIS_HOST'),
           port: configService.get<number>('REDIS_PORT'),
           password: configService.get<string>('REDIS_PASSWORD'),
