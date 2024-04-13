@@ -30,6 +30,14 @@ export const constructRichText = ({ text, urls, media }: TweetData) => {
   if (lastIndex < cleanText.length) {
     result.push(constructText(cleanText.substring(lastIndex)));
   }
+
+  return result.flatMap((item) =>
+    item.text.content
+      .split('\n')
+      .map((_text: any, index) =>
+        constructText((index === 0 ? '' : '\n') + _text, item.text?.link?.url),
+      ),
+  );
   return result;
 };
 
