@@ -36,22 +36,27 @@ export class NotionService {
     accessToken: string,
     databaseId: string,
     tweets: TweetData[],
-    tag: string[] = [],
     id: string,
+    tag: string[] = [],
   ) {
     const firstTweet = tweets.at(0);
-    const page = await this.notionSdk.createPage(
-      accessToken,
-      databaseId,
-      firstTweet,
-      tweets.length > 1 ? TwitterDataType.THREAD : TwitterDataType.TWEET,
-      tag,
-    );
+    try {
+      const page = await this.notionSdk.createPage(
+        accessToken,
+        databaseId,
+        firstTweet,
+        tweets.length > 1 ? TwitterDataType.THREAD : TwitterDataType.TWEET,
+        tag,
+      );
 
-    await this.notionSdk.createBlock(accessToken, page.id, tweets);
+      await this.notionSdk.createBlock(accessToken, page.id, tweets);
 
-    this.bookmarkNotification.emitSentToNotion(id, page.url);
-    this.bookmarkNotification.emitCompleted(id);
+      this.bookmarkNotification.emitSentToNotion(id, page.url);
+      this.bookmarkNotification.emitCompleted(id);
+    } catch (error) {
+      this.bookmarkNotification.emitError(error.message, id);
+      throw error;
+    }
   }
 
   async bookmarkTweet(accessToken: string, payload: GetTweetDataDto) {

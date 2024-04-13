@@ -26,8 +26,8 @@ export class NotionConsumer {
       accessToken,
       databaseId,
       tweets,
-      tags,
       id,
+      tags,
     );
   }
 }
