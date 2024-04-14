@@ -1,43 +1,34 @@
 import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
-import { CHARACTER_ENTITIES_MAP, SPACE } from './notion-sdk.constant';
+import { CHARACTER_ENTITIES_MAP, NEW_LINE, SPACE } from './notion-sdk.constant';
 
 export const constructRichText = ({ text, urls, media }: TweetData) => {
-  const result = [];
-  let lastIndex = 0;
-
   const cleanText = removeSpecialCharacters(removeMediaUrls(media, text));
+  let urlSeparators = '\n';
+  if (urls.length > 0) {
+    urlSeparators = `${urlSeparators}|${urls
+      .map((item) => item.url)
+      .join('|')}`;
+  }
+  const urlPattern = new RegExp(`(${urlSeparators})`, 'g'); // Combine URLs and newline with global multiline flags
+  const splitText = cleanText.split(urlPattern);
 
-  urls.forEach((item) => {
-    const pattern = new RegExp(`(${item.url})`, 'g');
-    let match: RegExpExecArray;
-
-    while ((match = pattern.exec(cleanText)) !== null) {
-      // Add the text before the match as a separate object
-      if (match.index > lastIndex) {
-        result.push(constructText(cleanText.substring(lastIndex, match.index)));
-      }
-
-      // Add the matched text with the link
-      result.push(constructText(item.display_url, item.expanded_url));
-
-      // Update the lastIndex to the end of the matched text
-      lastIndex = match.index + match[0].length;
+  const result = splitText.map((textSegment, index) => {
+    // Even elements are text segments, odd elements are matched URLs or newlines
+    if (index % 2 === 0) {
+      return constructText(textSegment); // Process plain text
     }
+
+    // Check if it's a newline
+    if (textSegment === '\n') {
+      return NEW_LINE; // Or modify based on your desired handling
+    }
+
+    const url = urls.find((url) => url.url === textSegment);
+
+    return constructText(url.display_url, url.expanded_url);
   });
 
-  // Add the remaining text after the last match
-  if (lastIndex < cleanText.length) {
-    result.push(constructText(cleanText.substring(lastIndex)));
-  }
-
-  return result.flatMap((item) =>
-    item.text.content
-      .split('\n')
-      .map((_text: any, index) =>
-        constructText((index === 0 ? '' : '\n') + _text, item.text?.link?.url),
-      ),
-  );
   return result;
 };
 
@@ -149,6 +140,7 @@ export const constructCalloutContent = (tweet: TweetData) => {
 
 export const constructText = (text: string, url?: string) => ({
   text: { content: text, ...(url && { link: { url } }) },
+  ...(url && { annotations: { color: 'blue' } }),
 });
 
 export const constructParagraph = (tweet: TweetData) => ({
@@ -187,10 +179,6 @@ export const trimTitleText = (text: string): string => {
   if (stopperIndex === -1) return text;
 
   const modifiedText = text.substring(0, stopperIndex);
-
-  // if (modifiedText.length > MAX_CHARACTERS) {
-  //   return modifiedText.substring(0, MAX_CHARACTERS) + '...';
-  // }
 
   return modifiedText;
 };

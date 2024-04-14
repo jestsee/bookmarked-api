@@ -45,12 +45,11 @@ export class BookmarkNotificationService {
       filter(({ data }) => data.id === id),
       takeWhile(({ data }) => !data.isCompleted),
       map(({ data }) => {
-        // TODO implement catchError instead?
         if (data.error) throw new BadRequestException(data.error);
         return { data };
       }),
       timeout({
-        each: 15000,
+        each: 8000,
         with: () =>
           throwError(() => new BadRequestException('Connection timed out')),
       }),

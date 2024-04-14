@@ -21,3 +21,10 @@ export const SPACE: any = {
     content: ' ',
   },
 };
+
+export const NEW_LINE: any = {
+  type: 'text',
+  text: {
+    content: '\n',
+  },
+};
