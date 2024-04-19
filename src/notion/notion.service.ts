@@ -8,6 +8,8 @@ import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { InjectQueue } from '@nestjs/bull';
 import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
 import { v4 as uuidv4 } from 'uuid';
+import { NotionData, NotionJobPayload } from './interface';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class NotionService {
@@ -15,6 +17,7 @@ export class NotionService {
     @InjectQueue(NOTION) private readonly notionQueue: Queue,
     private readonly notionSdk: NotionSdkService,
     private bookmarkNotification: BookmarkNotificationService,
+    private readonly httpService: HttpService,
   ) {}
 
   // https://developers.notion.com/docs/authorization#prompt-for-a-standard-integration-with-no-template-option-default
@@ -27,18 +30,30 @@ export class NotionService {
     return { access_token };
   }
 
+  async sendNotification(callbackUrl: string, data: NotionData) {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+
+    return this.httpService.axiosRef.post<null, null, NotionData>(
+      callbackUrl,
+      data,
+      { headers },
+    );
+  }
+
   async getDatabase(accessToken: string) {
     const [database] = (await this.notionSdk.getDatabases(accessToken)).results;
     return database;
   }
 
   async createPage(
-    accessToken: string,
-    databaseId: string,
-    tweets: TweetData[],
-    id: string,
-    tag: string[] = [],
+    params: Omit<NotionJobPayload, 'type' | 'url'> & {
+      tweets: TweetData[];
+    },
   ) {
+    const { tweets, accessToken, databaseId, tags, id, callbackUrl } = params;
     const firstTweet = tweets.at(0);
     try {
       const page = await this.notionSdk.createPage(
@@ -46,14 +61,26 @@ export class NotionService {
         databaseId,
         firstTweet,
         tweets.length > 1 ? TwitterDataType.THREAD : TwitterDataType.TWEET,
-        tag,
+        tags,
       );
 
       await this.notionSdk.createBlock(accessToken, page.id, tweets);
 
       this.bookmarkNotification.emitSentToNotion(id, page.url);
       this.bookmarkNotification.emitCompleted(id);
+
+      if (callbackUrl) {
+        const data: NotionData = {
+          author: tweets[0].name,
+          notionPageUrl: page.url,
+          text: tweets[0].text,
+          tweetUrl: tweets[0].url,
+          username: tweets[0].username,
+        };
+        this.sendNotification(callbackUrl, data);
+      }
     } catch (error) {
+      console.error('error page', error);
       this.bookmarkNotification.emitError(error.message, id);
       throw error;
     }

@@ -27,6 +27,11 @@ export class GetTweetDataDto {
   @IsNotEmpty()
   url: string;
 
+  @IsString()
+  @IsUrl()
+  @IsOptional()
+  callbackUrl: string;
+
   @IsEnum(TwitterDataType)
   @IsNotEmpty()
   type: TwitterDataType;

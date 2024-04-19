@@ -12,6 +12,7 @@ import { NotionAccessTokenMiddleware } from 'src/middleware/notion-access-token.
 import { BullModule } from '@nestjs/bull';
 import { NotionConsumer } from './notion.consumer';
 import { BookmarkNotificationModule } from 'src/bookmark-notification/bookmark-notification.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Global()
 @Module({
@@ -19,6 +20,7 @@ import { BookmarkNotificationModule } from 'src/bookmark-notification/bookmark-n
     BullModule.registerQueueAsync({ name: 'notion' }),
     TwitterModule,
     BookmarkNotificationModule,
+    HttpModule,
   ],
   providers: [NotionService, NotionConsumer],
   exports: [NotionService],

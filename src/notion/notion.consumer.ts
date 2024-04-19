@@ -14,20 +14,20 @@ export class NotionConsumer {
   ) {}
 
   @Process({ name: NOTION_JOB, concurrency: 4 })
-  async bookmarkTweet(job: Job<NotionJobPayload>) {
-    const { accessToken, databaseId, tags, type, url, id } = job.data;
+  async bookmarkTweet(
+    job: Job<Omit<NotionJobPayload, 'tags'> & { tags?: string[] }>,
+  ) {
+    const { type, url, id } = job.data;
     const tweets = await this.twitterService.getTwitterData(url, type, id);
 
     if (!tweets || tweets.length === 0) {
       throw new BadRequestException('Tweet not found');
     }
 
-    return this.notionService.createPage(
-      accessToken,
-      databaseId,
+    return this.notionService.createPage({
+      ...job.data,
+      tags: job.data.tags ?? [],
       tweets,
-      id,
-      tags,
-    );
+    });
   }
 }

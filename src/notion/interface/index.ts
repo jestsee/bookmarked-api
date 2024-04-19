@@ -16,3 +16,11 @@ export interface NotionJobPayload extends GetTweetDataDto {
   id: string;
   accessToken: string;
 }
+
+export interface NotionData {
+  notionPageUrl: string;
+  author: string;
+  username: string;
+  tweetUrl: string;
+  text: string;
+}
