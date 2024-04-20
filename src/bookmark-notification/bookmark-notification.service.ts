@@ -3,10 +3,14 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TweetData } from 'src/twitter/interface';
 import { BOOKMARK_EVENT, STATUS } from './bookmark-notification.constant';
 import { filter, fromEvent, map, takeWhile, throwError, timeout } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BookmarkNotificationService {
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    private eventEmitter: EventEmitter2,
+    private config: ConfigService,
+  ) {}
 
   emitTweetScraped(data: TweetData, length: number, id: string) {
     const { name, username, url, text } = data;
@@ -49,7 +53,7 @@ export class BookmarkNotificationService {
         return { data };
       }),
       timeout({
-        each: 8000,
+        each: this.config.get('SSER_TIMEOUT') ?? 15000,
         with: () =>
           throwError(() => new BadRequestException('Connection timed out')),
       }),
