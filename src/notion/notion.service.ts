@@ -36,11 +36,15 @@ export class NotionService {
       'Content-Type': 'application/json',
     };
 
-    return this.httpService.axiosRef.post<null, null, NotionData>(
-      callbackUrl,
-      data,
-      { headers },
-    );
+    try {
+      await this.httpService.axiosRef.post<null, null, NotionData>(
+        callbackUrl,
+        data,
+        { headers },
+      );
+    } catch (error) {
+      console.error('error sending notification', error);
+    }
   }
 
   async getDatabase(accessToken: string) {
@@ -76,8 +80,11 @@ export class NotionService {
           text: tweets[0].text,
           tweetUrl: tweets[0].url,
           username: tweets[0].username,
+          ...(params.additionalData && {
+            additionalData: params.additionalData,
+          }),
         };
-        this.sendNotification(callbackUrl, data);
+        await this.sendNotification(callbackUrl, data);
       }
     } catch (error) {
       console.error('error page', error);

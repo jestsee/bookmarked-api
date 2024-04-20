@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   IsUrl,
@@ -31,6 +32,10 @@ export class GetTweetDataDto {
   @IsUrl()
   @IsOptional()
   callbackUrl: string;
+
+  @IsOptional()
+  @IsObject()
+  additionalData: object;
 
   @IsEnum(TwitterDataType)
   @IsNotEmpty()

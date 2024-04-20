@@ -23,4 +23,5 @@ export interface NotionData {
   username: string;
   tweetUrl: string;
   text: string;
+  additionalData?: object;
 }
