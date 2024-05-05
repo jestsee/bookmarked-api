@@ -18,16 +18,6 @@ export class TwitterService {
     return newUrl;
   }
 
-  private handleError(error: Error, id: string) {
-    if (error.message.includes('Navigating frame was detached')) {
-      console.error('Frame detached!! Skipping interaction.');
-    } else {
-      this.bookmarkNotification.emitError(error, id);
-      console.log('[ERROR 2]', error);
-      throw error;
-    }
-  }
-
   // avoid to use early return when the process likely still continue
   private async getTwitterDataByNetworkHelper(
     payload: GetTweetDataPayload,
@@ -72,28 +62,24 @@ export class TwitterService {
         this.bookmarkNotification.emitAllTweetScraped(id);
         resolve(arrData.reverse());
       } else {
-        // recursive function
-        try {
-          const newUrl = this.generateNewUrl(url, parentTweet);
-          const newPage = await this.puppeteer.browser.newPage();
-          newPage.on(
-            'response',
-            (response) =>
-              response.request().method().toUpperCase() != 'OPTIONS' &&
-              this.getTwitterDataByNetworkHelper(
-                {
-                  ...payload,
-                  response,
-                  page: newPage,
-                  url: newUrl,
-                },
-                id,
-              ),
-          );
-          await newPage.goto(newUrl);
-        } catch (error) {
-          this.handleError(error, id);
-        }
+        // the recursive call
+        const newUrl = this.generateNewUrl(url, parentTweet);
+        const newPage = await this.puppeteer.browser.newPage();
+        newPage.on(
+          'response',
+          (response) =>
+            response.request().method().toUpperCase() != 'OPTIONS' &&
+            this.getTwitterDataByNetworkHelper(
+              {
+                ...payload,
+                response,
+                page: newPage,
+                url: newUrl,
+              },
+              id,
+            ),
+        );
+        await this.puppeteer.customGoto(newPage, newUrl);
       }
     }
   }
@@ -103,34 +89,28 @@ export class TwitterService {
     isThread: boolean,
     id: string,
   ): Promise<TweetData[]> {
-    let resultPromise: Promise<TweetData[]>;
+    const arrData: TweetData[] = [];
+    const page = await this.puppeteer.browser.newPage();
+    const resultPromise = new Promise<TweetData[]>(async (resolve) => {
+      page.on(
+        'response',
+        (response) =>
+          response.request().method().toUpperCase() != 'OPTIONS' &&
+          this.getTwitterDataByNetworkHelper(
+            {
+              response,
+              resolve,
+              page,
+              url,
+              arrData,
+              isThread,
+            },
+            id,
+          ),
+      );
+    });
 
-    try {
-      const arrData: TweetData[] = [];
-      const page = await this.puppeteer.browser.newPage();
-      resultPromise = new Promise<TweetData[]>(async (resolve) => {
-        page.on(
-          'response',
-          (response) =>
-            response.request().method().toUpperCase() != 'OPTIONS' &&
-            this.getTwitterDataByNetworkHelper(
-              {
-                response,
-                resolve,
-                page,
-                url,
-                arrData,
-                isThread,
-              },
-              id,
-            ),
-        );
-      });
-
-      await page.goto(url);
-    } catch (error) {
-      this.handleError(error, id);
-    }
+    await this.puppeteer.customGoto(page, url);
 
     return resultPromise; // Wait for the Promise to be resolved
   }
