@@ -32,11 +32,12 @@ export class NotionConsumer {
   }
 
   @OnQueueFailed()
-  async onFailed(job: JobPayload) {
+  async onFailed(job: JobPayload, error: Error) {
     console.log(`Job ${job.id} failed with reason ${job.failedReason}`);
+    console.error('error nya', error);
     const { callbackUrl, additionalData } = job.data;
 
-    if (!callbackUrl || job.failedReason === 'Navigating frame was detached') {
+    if (!callbackUrl) {
       return;
     }
 
