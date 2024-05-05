@@ -8,7 +8,7 @@ import { MAP_JOB_STATUS, NOTION, NOTION_JOB } from './notion.constant';
 import { InjectQueue } from '@nestjs/bull';
 import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-notification.service';
 import { v4 as uuidv4 } from 'uuid';
-import { NotionData, NotionJobPayload } from './interface';
+import { NotificationPayload, NotionData, NotionJobPayload } from './interface';
 import { HttpService } from '@nestjs/axios';
 
 @Injectable()
@@ -30,14 +30,14 @@ export class NotionService {
     return { access_token };
   }
 
-  async sendNotification(callbackUrl: string, data: NotionData) {
+  async sendNotification(callbackUrl: string, data: NotificationPayload) {
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     };
 
     try {
-      await this.httpService.axiosRef.post<null, null, NotionData>(
+      return this.httpService.axiosRef.post<null, null, NotificationPayload>(
         callbackUrl,
         data,
         { headers },
@@ -84,7 +84,7 @@ export class NotionService {
             additionalData: params.additionalData,
           }),
         };
-        await this.sendNotification(callbackUrl, data);
+        await this.sendNotification(callbackUrl, { type: 'success', ...data });
       }
     } catch (error) {
       console.error('error page', error);

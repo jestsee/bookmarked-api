@@ -17,11 +17,15 @@ export interface NotionJobPayload extends GetTweetDataDto {
   accessToken: string;
 }
 
-export interface NotionData {
+export type NotionData = {
   notionPageUrl: string;
   author: string;
   username: string;
   tweetUrl: string;
   text: string;
   additionalData?: object;
-}
+};
+
+export type NotificationPayload =
+  | ({ type: 'success' } & NotionData)
+  | { type: 'error'; error: string; additionalData?: object };
