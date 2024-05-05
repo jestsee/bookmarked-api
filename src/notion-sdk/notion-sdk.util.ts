@@ -2,7 +2,12 @@ import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
 import { CHARACTER_ENTITIES_MAP, NEW_LINE, SPACE } from './notion-sdk.constant';
 
-export const constructRichText = ({ text, urls, media }: TweetData) => {
+/**
+ * Function to build the content of a tweet in Notion format
+ * @param {TweetData} tweet
+ * @returns array of paragraph objects
+ */
+export const buildContent = ({ text, urls, media }: TweetData) => {
   const cleanText = removeSpecialCharacters(removeMediaUrls(media, text));
   let urlSeparators = '\n';
   if (urls.length > 0) {
@@ -10,26 +15,36 @@ export const constructRichText = ({ text, urls, media }: TweetData) => {
       .map((item) => item.url)
       .join('|')}`;
   }
-  const urlPattern = new RegExp(`(${urlSeparators})`, 'g'); // Combine URLs and newline with global multiline flags
+
+  // Combine URLs and newline with global multiline flags
+  const urlPattern = new RegExp(`(${urlSeparators})`, 'g');
   const splitText = cleanText.split(urlPattern);
 
-  const result = splitText.map((textSegment, index) => {
+  const paragraphs = [{ paragraph: { rich_text: [] } }];
+
+  splitText.forEach((textSegment, index) => {
     // Even elements are text segments, odd elements are matched URLs or newlines
     if (index % 2 === 0) {
-      return constructText(textSegment); // Process plain text
+      return paragraphs[paragraphs.length - 1].paragraph.rich_text.push(
+        constructText(textSegment),
+      );
     }
 
     // Check if it's a newline
     if (textSegment === '\n') {
-      return NEW_LINE; // Or modify based on your desired handling
+      return paragraphs.push({ paragraph: { rich_text: [] } });
     }
 
+    // Find the URL object that matches the matched URL
     const url = urls.find((url) => url.url === textSegment);
 
-    return constructText(url.display_url, url.expanded_url);
+    // return constructText(url.display_url, url.expanded_url);
+    paragraphs[paragraphs.length - 1].paragraph.rich_text.push(
+      constructText(url.display_url, url.expanded_url),
+    );
   });
 
-  return result;
+  return paragraphs;
 };
 
 export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
@@ -96,7 +111,7 @@ const constructDate = (date: string) => {
 
 export const constructCalloutContent = (tweet: TweetData) => {
   if (!tweet.inlineMedia || tweet.inlineMedia.length === 0) {
-    return [constructParagraph(tweet)];
+    return buildContent(tweet);
   }
 
   const { text } = tweet;
@@ -111,7 +126,7 @@ export const constructCalloutContent = (tweet: TweetData) => {
       // Add the text before the match as a separate object
       if (match.index > lastIndex) {
         result.push(
-          constructParagraph({
+          ...buildContent({
             ...tweet,
             text: text.substring(lastIndex, match.index),
           }),
@@ -129,7 +144,7 @@ export const constructCalloutContent = (tweet: TweetData) => {
   // Add the remaining text after the last match
   if (lastIndex < text.length) {
     result.push(
-      constructParagraph({
+      ...buildContent({
         ...tweet,
         text: text.substring(lastIndex),
       }),
@@ -141,10 +156,6 @@ export const constructCalloutContent = (tweet: TweetData) => {
 export const constructText = (text: string, url?: string) => ({
   text: { content: text, ...(url && { link: { url } }) },
   ...(url && { annotations: { color: 'blue' } }),
-});
-
-export const constructParagraph = (tweet: TweetData) => ({
-  paragraph: { rich_text: constructRichText(tweet) },
 });
 
 export const constructImage = (url: string) => ({

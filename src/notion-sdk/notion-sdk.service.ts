@@ -7,7 +7,7 @@ import { TwitterDataType } from 'src/twitter/dto';
 import { TweetData } from 'src/twitter/interface';
 import {
   constructCallout,
-  constructRichText,
+  buildContent,
   trimTitleText,
 } from './notion-sdk.util';
 import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
@@ -77,10 +77,10 @@ export class NotionSdkService {
       },
       properties: {
         Tweet: {
-          title: constructRichText({
+          title: buildContent({
             ...tweet,
             text: trimTitleText(tweet.text.substring(0, 2000)),
-          }),
+          })[0].paragraph.rich_text,
         },
         Type: {
           select: { name: type.charAt(0).toUpperCase() + type.slice(1) },
