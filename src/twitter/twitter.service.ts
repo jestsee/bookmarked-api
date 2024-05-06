@@ -29,6 +29,11 @@ export class TwitterService {
         !response.headers()['content-type'] ||
         !response.headers()['content-type'].includes('application/json')
       ) {
+        const text = await response.text();
+        console.log('error masok sini yak', text);
+
+        await this.puppeteer.restartBrowser();
+
         this.bookmarkNotification.emitCompleted(id);
         return resolve([]);
       }
@@ -57,35 +62,24 @@ export class TwitterService {
         this.bookmarkNotification.emitAllTweetScraped(id);
         resolve(arrData.reverse());
       } else {
-        // recursive function
-        try {
-          const newUrl = this.generateNewUrl(url, parentTweet);
-          const newPage = await this.puppeteer.browser.newPage();
-          newPage.on(
-            'response',
-            (response) =>
-              response.request().method().toUpperCase() != 'OPTIONS' &&
-              this.getTwitterDataByNetworkHelper(
-                {
-                  ...payload,
-                  response,
-                  page: newPage,
-                  url: newUrl,
-                },
-                id,
-              ),
-          );
-          await newPage.goto(newUrl);
-        } catch (error) {
-          if (error.message.includes('Navigating frame was detached')) {
-            console.error('Frame detached!! Skipping interaction.');
-          } else {
-            this.bookmarkNotification.emitError(error, id);
-            console.log('[ERROR]', error);
-            resolve(arrData.reverse());
-            throw error;
-          }
-        }
+        // the recursive call
+        const newUrl = this.generateNewUrl(url, parentTweet);
+        const newPage = await this.puppeteer.browser.newPage();
+        newPage.on(
+          'response',
+          (response) =>
+            response.request().method().toUpperCase() != 'OPTIONS' &&
+            this.getTwitterDataByNetworkHelper(
+              {
+                ...payload,
+                response,
+                page: newPage,
+                url: newUrl,
+              },
+              id,
+            ),
+        );
+        await this.puppeteer.customGoto(newPage, newUrl);
       }
     }
   }
@@ -116,9 +110,9 @@ export class TwitterService {
       );
     });
 
-    await page.goto(url);
-    const result = await resultPromise; // Wait for the Promise to be resolved
-    return result;
+    await this.puppeteer.customGoto(page, url);
+
+    return resultPromise; // Wait for the Promise to be resolved
   }
 
   getTwitterData(url: string, type: TwitterDataType, id: string) {
