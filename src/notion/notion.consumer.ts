@@ -34,7 +34,7 @@ export class NotionConsumer {
   @OnQueueFailed()
   async onFailed(job: JobPayload, error: Error) {
     console.log(`Job ${job.id} failed with reason ${job.failedReason}`);
-    console.error('error nya', error);
+    console.error(error);
     const { callbackUrl, additionalData } = job.data;
 
     if (!callbackUrl) {

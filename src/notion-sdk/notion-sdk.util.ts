@@ -1,6 +1,6 @@
 import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
-import { CHARACTER_ENTITIES_MAP, NEW_LINE, SPACE } from './notion-sdk.constant';
+import { CHARACTER_ENTITIES_MAP, SPACE } from './notion-sdk.constant';
 
 /**
  * Function to build the content of a tweet in Notion format
