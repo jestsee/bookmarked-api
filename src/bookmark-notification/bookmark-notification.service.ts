@@ -53,7 +53,7 @@ export class BookmarkNotificationService {
         return { data };
       }),
       timeout({
-        each: this.config.get('SSER_TIMEOUT') ?? 15000,
+        each: this.config.get('SSR_TIMEOUT') ?? 15000,
         with: () =>
           throwError(() => new BadRequestException('Connection timed out')),
       }),
