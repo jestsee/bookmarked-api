@@ -1,6 +1,6 @@
 import { BlockObjectRequest } from '@notionhq/client/build/src/api-endpoints';
 import { TweetData, TweetMedia } from 'src/twitter/interface';
-import { CHARACTER_ENTITIES_MAP, NEW_LINE, SPACE } from './notion-sdk.constant';
+import { CHARACTER_ENTITIES_MAP, SPACE } from './notion-sdk.constant';
 
 /**
  * Function to build the content of a tweet in Notion format
@@ -50,7 +50,7 @@ export const buildContent = ({ text, urls, media }: TweetData) => {
 export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
   const children = [
     ...constructCalloutContent(tweet),
-    ...tweet.media.map(({ media_url_https: url }) => constructImage(url)),
+    ...tweet.media.map(constructMedia),
     ...tweet.urls.map(({ expanded_url: url }) => constructBookmark(url)),
   ];
 
@@ -158,8 +158,24 @@ export const constructText = (text: string, url?: string) => ({
   ...(url && { annotations: { color: 'blue' } }),
 });
 
+export const constructMedia = (media: TweetMedia) => {
+  if (media.video_info) {
+    const videoVariants = media.video_info.variants.filter(
+      (variant) => variant.content_type === 'video/mp4',
+    );
+    const video = videoVariants[videoVariants.length - 1];
+    return constructVideo(video.url);
+  }
+
+  return constructImage(media.media_url_https);
+};
+
 export const constructImage = (url: string) => ({
   image: { external: { url } },
+});
+
+export const constructVideo = (url: string) => ({
+  video: { external: { url } },
 });
 
 export const constructBookmark = (url: string) => ({

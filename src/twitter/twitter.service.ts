@@ -8,8 +8,8 @@ import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-
 @Injectable()
 export class TwitterService {
   constructor(
-    private puppeteer: PuppeteerService,
-    private bookmarkNotification: BookmarkNotificationService,
+    private readonly puppeteer: PuppeteerService,
+    private readonly bookmarkNotification: BookmarkNotificationService,
   ) {}
 
   private generateNewUrl(url: string, code: string) {
@@ -25,16 +25,12 @@ export class TwitterService {
   ) {
     const { arrData, isThread, resolve, response, url, page } = payload;
     if (response.url().includes('graphql')) {
-      if (
-        !response.headers()['content-type'] ||
-        !response.headers()['content-type'].includes('application/json')
-      ) {
+      if (!response.headers()['content-type']?.includes('application/json')) {
         const text = await response.text();
         console.log('error masok sini yak', text);
 
-        await this.puppeteer.restartBrowser();
-
         this.bookmarkNotification.emitCompleted(id);
+        await payload.browser.close();
         return resolve([]);
       }
 
@@ -43,6 +39,7 @@ export class TwitterService {
       // Tweet not found
       if (!_response?.data?.tweetResult?.result) {
         this.bookmarkNotification.emitCompleted(id);
+        await payload.browser.close();
         return resolve(arrData.reverse());
       }
 
@@ -60,11 +57,12 @@ export class TwitterService {
       // stop condition
       if (!isThread || !parentTweet) {
         this.bookmarkNotification.emitAllTweetScraped(id);
+        await payload.browser.close();
         resolve(arrData.reverse());
       } else {
         // the recursive call
         const newUrl = this.generateNewUrl(url, parentTweet);
-        const newPage = await this.puppeteer.browser.newPage();
+        const newPage = await payload.browser.newPage();
         newPage.on(
           'response',
           (response) =>
@@ -90,8 +88,10 @@ export class TwitterService {
     id: string,
   ): Promise<TweetData[]> {
     const arrData: TweetData[] = [];
-    const page = await this.puppeteer.browser.newPage();
-    const resultPromise = new Promise<TweetData[]>(async (resolve) => {
+    const browser = await this.puppeteer.openBrowser();
+    const page = await browser.newPage();
+
+    const resultPromise = new Promise<TweetData[]>((resolve) => {
       page.on(
         'response',
         (response) =>
@@ -100,6 +100,7 @@ export class TwitterService {
             {
               response,
               resolve,
+              browser,
               page,
               url,
               arrData,

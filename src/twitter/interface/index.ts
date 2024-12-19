@@ -1,4 +1,4 @@
-import { HTTPResponse, Page } from 'puppeteer';
+import { Browser, HTTPResponse, Page } from 'puppeteer';
 
 export interface TweetData {
   name: string;
@@ -19,9 +19,18 @@ export interface TweetUrl {
   url: string;
 }
 
+export interface TweetVideoVariant {
+  bitrate?: number;
+  content_type: string;
+  url: string;
+}
+
 export interface TweetMedia extends TweetUrl {
   media_url_https: string;
   id_str: string;
+  video_info: {
+    variants: TweetVideoVariant[];
+  };
 }
 
 export interface InlineMedia {
@@ -32,6 +41,7 @@ export interface InlineMedia {
 export interface GetTweetDataPayload {
   response: HTTPResponse;
   resolve: (value: unknown) => void;
+  browser: Browser;
   page: Page;
   url: string;
   arrData: TweetData[];

@@ -11,8 +11,8 @@ type JobPayload = Job<Omit<NotionJobPayload, 'tags'> & { tags?: string[] }>;
 @Processor(NOTION)
 export class NotionConsumer {
   constructor(
-    private notionService: NotionService,
-    private twitterService: TwitterService,
+    private readonly notionService: NotionService,
+    private readonly twitterService: TwitterService,
   ) {}
 
   @Process({ name: NOTION_JOB, concurrency: 4 })
@@ -34,7 +34,7 @@ export class NotionConsumer {
   @OnQueueFailed()
   async onFailed(job: JobPayload, error: Error) {
     console.log(`Job ${job.id} failed with reason ${job.failedReason}`);
-    console.error('error nya', error);
+    console.error(error);
     const { callbackUrl, additionalData } = job.data;
 
     if (!callbackUrl) {
