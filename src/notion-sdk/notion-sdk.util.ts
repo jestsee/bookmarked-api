@@ -50,8 +50,7 @@ export const buildContent = ({ text, urls, media }: TweetData) => {
 export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
   const children = [
     ...constructCalloutContent(tweet),
-    ...tweet.media.map(({ media_url_https: url }) => constructImage(url)),
-    ...tweet.video.map(({ url }) => constructVideo(url)),
+    ...tweet.media.map(constructMedia),
     ...tweet.urls.map(({ expanded_url: url }) => constructBookmark(url)),
   ];
 
@@ -158,6 +157,18 @@ export const constructText = (text: string, url?: string) => ({
   text: { content: text, ...(url && { link: { url } }) },
   ...(url && { annotations: { color: 'blue' } }),
 });
+
+export const constructMedia = (media: TweetMedia) => {
+  if (media.video_info) {
+    const videoVariants = media.video_info.variants.filter(
+      (variant) => variant.content_type === 'video/mp4',
+    );
+    const video = videoVariants[videoVariants.length - 1];
+    return constructVideo(video.url);
+  }
+
+  return constructImage(media.media_url_https);
+};
 
 export const constructImage = (url: string) => ({
   image: { external: { url } },

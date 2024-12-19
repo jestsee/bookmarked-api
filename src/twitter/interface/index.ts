@@ -10,7 +10,6 @@ export interface TweetData {
   quotedTweet?: TweetData;
   urls: TweetUrl[];
   media: TweetMedia[];
-  video: TweetVideoVariant[];
   inlineMedia?: string[];
 }
 
