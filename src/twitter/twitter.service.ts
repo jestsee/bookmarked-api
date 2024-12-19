@@ -8,8 +8,8 @@ import { BookmarkNotificationService } from 'src/bookmark-notification/bookmark-
 @Injectable()
 export class TwitterService {
   constructor(
-    private puppeteer: PuppeteerService,
-    private bookmarkNotification: BookmarkNotificationService,
+    private readonly puppeteer: PuppeteerService,
+    private readonly bookmarkNotification: BookmarkNotificationService,
   ) {}
 
   private generateNewUrl(url: string, code: string) {
@@ -91,7 +91,7 @@ export class TwitterService {
     const browser = await this.puppeteer.openBrowser();
     const page = await browser.newPage();
 
-    const resultPromise = new Promise<TweetData[]>(async (resolve) => {
+    const resultPromise = new Promise<TweetData[]>((resolve) => {
       page.on(
         'response',
         (response) =>

@@ -11,8 +11,8 @@ type JobPayload = Job<Omit<NotionJobPayload, 'tags'> & { tags?: string[] }>;
 @Processor(NOTION)
 export class NotionConsumer {
   constructor(
-    private notionService: NotionService,
-    private twitterService: TwitterService,
+    private readonly notionService: NotionService,
+    private readonly twitterService: TwitterService,
   ) {}
 
   @Process({ name: NOTION_JOB, concurrency: 4 })

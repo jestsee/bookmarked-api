@@ -51,6 +51,7 @@ export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
   const children = [
     ...constructCalloutContent(tweet),
     ...tweet.media.map(({ media_url_https: url }) => constructImage(url)),
+    ...tweet.video.map(({ url }) => constructVideo(url)),
     ...tweet.urls.map(({ expanded_url: url }) => constructBookmark(url)),
   ];
 
@@ -160,6 +161,10 @@ export const constructText = (text: string, url?: string) => ({
 
 export const constructImage = (url: string) => ({
   image: { external: { url } },
+});
+
+export const constructVideo = (url: string) => ({
+  video: { external: { url } },
 });
 
 export const constructBookmark = (url: string) => ({

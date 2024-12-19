@@ -27,6 +27,13 @@ export const extractTweetData = (
 const extractTweetContent = (result: any) => {
   const urls = (result.legacy.entities.urls ?? []) as TweetUrl[];
   const media = (result.legacy.entities.media ?? []) as TweetMedia[];
+  const video = media.map((item) => {
+    const videoVariants = item.video_info?.variants.filter(
+      (variant) => variant.content_type === 'video/mp4',
+    );
+    return videoVariants[videoVariants.length - 1];
+  });
+  console.log({ video });
 
   if (result.note_tweet?.note_tweet_results?.result) {
     const { result: noteTweetResult } = result.note_tweet.note_tweet_results;
@@ -56,11 +63,12 @@ const extractTweetContent = (result: any) => {
       text: modifiedText,
       urls: noteTweetUrls.length > 0 ? noteTweetUrls : urls,
       media: inlineMedia.length > 0 ? [] : media,
+      video,
     };
   }
 
   const text = result.legacy.full_text;
-  return { text, urls, media };
+  return { text, urls, media, video };
 };
 
 const insertSubstring = (

@@ -10,6 +10,7 @@ export interface TweetData {
   quotedTweet?: TweetData;
   urls: TweetUrl[];
   media: TweetMedia[];
+  video: TweetVideoVariant[];
   inlineMedia?: string[];
 }
 
@@ -19,9 +20,18 @@ export interface TweetUrl {
   url: string;
 }
 
+export interface TweetVideoVariant {
+  bitrate?: number;
+  content_type: string;
+  url: string;
+}
+
 export interface TweetMedia extends TweetUrl {
   media_url_https: string;
   id_str: string;
+  video_info: {
+    variants: TweetVideoVariant[];
+  };
 }
 
 export interface InlineMedia {

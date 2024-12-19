@@ -8,8 +8,8 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class BookmarkNotificationService {
   constructor(
-    private eventEmitter: EventEmitter2,
-    private config: ConfigService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly config: ConfigService,
   ) {}
 
   emitTweetScraped(data: TweetData, length: number, id: string) {
