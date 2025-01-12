@@ -54,6 +54,11 @@ export const constructCallout = (tweet: TweetData): BlockObjectRequest => {
     ...tweet.urls.map(({ expanded_url: url }) => constructBookmark(url)),
   ];
 
+  // video thumbnail for notion thumbnail
+  if (tweet.media.length === 1 && tweet.media[0].video_info) {
+    children.unshift(constructImage(tweet.media[0].media_url_https) as any);
+  }
+
   // quoted tweet
   if (tweet.quotedTweet) {
     children.push(constructCallout(tweet.quotedTweet) as any);
