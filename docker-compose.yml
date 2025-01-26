@@ -8,8 +8,9 @@ services:
       - dokploy-network
 
   bookmarked-api:
-    container_name: bookmarked-api
-    image: ghcr.io/jestsee/bookmarked-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     ports:
       - 3000
