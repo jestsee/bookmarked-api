@@ -4,17 +4,25 @@ services:
     restart: always
     ports:
       - 6379
+    networks:
+      - dokploy-network
 
   bookmarked-api:
     container_name: bookmarked-api
     image: ghcr.io/jestsee/bookmarked-api:latest
     restart: always
     ports:
-      - 3001
+      - 3000
     depends_on:
       - redis
-    env_file:
-      - .env
+    networks:
+      - dokploy-network
+    # env_file:
+    #   - .env
+
+networks:
+  dokploy-network:
+    external: true
 
   # nginx:
   #   container_name: nginx
