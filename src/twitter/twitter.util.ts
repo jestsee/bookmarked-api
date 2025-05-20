@@ -14,7 +14,7 @@ export const extractTweetData = (
   return {
     name: userData.name,
     username: userData.screen_name,
-    avatar: userData.profile_image_url_https,
+    avatar: result.core.user_results.result.avatar?.image_url,
     date: result.legacy.created_at,
     url,
     ...tweetContent,
